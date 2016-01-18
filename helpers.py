@@ -172,11 +172,11 @@ def initdb(config):
     with connection:
         with connection.cursor() as cursor:
             cursor.execute('''
-            create schema if not exists sqilibrist;
+            create schema if not exists sqlibrist;
             ''')
 
             cursor.execute('''
-            create table if not exists sqilibrist.migrations (
+            create table if not exists sqlibrist.migrations (
             id SERIAL PRIMARY key,
             migration text,
             datetime TIMESTAMPTZ DEFAULT current_timestamp

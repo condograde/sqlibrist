@@ -6,7 +6,7 @@ from helpers import get_connection
 
 
 
-def status(config):
+def status(config, args):
     """
     1. get applied migrations
     2. get all migrations
@@ -21,7 +21,7 @@ def status(config):
     with connection:
         with connection.cursor() as cursor:
             cursor.execute('''
-            select migration from sqitchpy.migrations
+            select migration from sqlibrist.migrations
             order by datetime''')
             applied_migrations = cursor.fetchall()
 

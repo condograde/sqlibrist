@@ -25,6 +25,7 @@ def init(config, args):
         'schema/triggers',
         'schema/indexes',
         'schema/types',
+        'schema/constraints',
         'migrations'
     )
 
