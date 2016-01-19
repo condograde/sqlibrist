@@ -1,7 +1,6 @@
 # -*- coding: utf8 -*-
 from sys import stdout
 
-from helpers import get_connection
 import os
 
 DEFAULT_CONFIG_FILE = 'sqlibrist.yaml'
@@ -15,7 +14,7 @@ default:
 """
 
 
-def init(config, args):
+def init(args):
     stdout.write(u'Creating directories...\n')
     dirlist = (
         'schema',

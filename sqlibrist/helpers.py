@@ -7,19 +7,49 @@ from json import loads, dumps
 from sys import stdout
 
 import psycopg2
+import yaml
+from yaml.scanner import ScannerError
 
 
-class CircularDependencyException(Exception):
+class SqlibristException(Exception):
     pass
 
 
-class UnknownDependencyException(Exception):
+class CircularDependencyException(SqlibristException):
     pass
+
+
+class UnknownDependencyException(SqlibristException):
+    pass
+
+
+class BadConfig(SqlibristException):
+    pass
+
+
+def get_config(args):
+    try:
+        with open(args.config_file) as config_file:
+            configs = yaml.load(config_file.read())
+    except IOError:
+        raise BadConfig(u'No config file %s found!' % args.config_file)
+    except ScannerError as e:
+        raise BadConfig(u'Bad config file syntax')
+    else:
+        try:
+            return configs[args.config]
+        except KeyError:
+            raise BadConfig(u'No config named %s found!' % args.config)
 
 
 def get_connection(config):
-    return psycopg2.connect(database=config.get('name'),
-                            user=config.get('user'))
+    return psycopg2.connect(
+            database=config.get('name'),
+            user=config.get('user'),
+            host=config.get('host'),
+            password=config.get('password'),
+            port=config.get('port'),
+    )
 
 
 def get_last_schema():
@@ -86,14 +116,14 @@ def schema_collector():
                 yield init_item(directory, filename)
 
 
-def test_for_circular_dependencies(schema, name, metadata, stack=()):
+def check_for_circular_dependencies(schema, name, metadata, stack=()):
     if name in stack:
         raise CircularDependencyException(stack + (name,))
     for requires in metadata['requires']:
-        test_for_circular_dependencies(schema,
-                                       requires,
-                                       schema[requires],
-                                       stack + (name,))
+        check_for_circular_dependencies(schema,
+                                        requires,
+                                        schema[requires],
+                                        stack + (name,))
 
 
 def calculate_cumulative_degree(schema, name, metadata, degree=0):
@@ -116,7 +146,7 @@ def get_current_schema():
 
             schema[requirement]['required'].append(name)
     for name, metadata in schema.items():
-        test_for_circular_dependencies(schema, name, metadata)
+        check_for_circular_dependencies(schema, name, metadata)
         metadata['degree'] = calculate_cumulative_degree(schema, name, metadata)
     return schema
 
@@ -137,27 +167,21 @@ def compare_schemas(last_schema, current_schema):
 def save_migration(schema, plan, suffix=''):
     migration_name = '%04.f%s' % (len(glob.glob('migrations/*')) + 1, suffix)
     dirname = os.path.join('migrations', migration_name)
-    stdout.write(u'Creating new migration %s...\n' % migration_name)
+    stdout.write(u'Creating new migration %s\n' % migration_name)
     os.mkdir(dirname)
-    with open(os.path.join(dirname, 'schema.json'), 'w') as f:
+    schema_filename = os.path.join(dirname, 'schema.json')
+    with open(schema_filename, 'w') as f:
         f.write(dumps(schema, indent=2))
 
-    with open(os.path.join(dirname, 'up.sql'), 'w') as f:
+    up_filename = os.path.join(dirname, 'up.sql')
+    with open(up_filename, 'w') as f:
         for item in plan:
-            f.write('-- started --\n')
-            f.write('\n'.join(item).strip())
+            f.write('-- begin --\n')
+            f.write('\n'.join(item.encode('utf8')).strip())
             f.write('\n')
-            f.write('-- ended --\n')
+            f.write('-- end --\n')
             f.write('\n')
             f.write('\n')
-
-    # with open(os.path.join(dirname, 'down.sql'), 'w') as f:
-    #     for item in reversed(plan):
-    #         f.write(u'-- "%s" started --\n' % item)
-    #         f.write(u'\n'.join(schema[item]['down']))
-    #         f.write(u'\n')
-    #         f.write(u'-- "%s" ended --\n' % item)
-    #         f.write(u'\n')
 
 
 def mark_affected_items(schema, name):
@@ -183,3 +207,14 @@ def initdb(config):
             );
             ''')
     connection.close()
+
+
+def handle_exception(e):
+    if isinstance(e, CircularDependencyException):
+        stdout.write(u'Circular dependency:\n')
+        stdout.write(u'  %s' % u' >\n  '.join(e.message))
+        stdout.write(u'\n')
+    elif isinstance(e, UnknownDependencyException):
+        stdout.write(u'Unknown dependency %s at %s\n' % e.message)
+    elif isinstance(e, BadConfig):
+        stdout.write(e.message + u'\n')

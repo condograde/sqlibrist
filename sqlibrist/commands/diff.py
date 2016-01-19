@@ -2,10 +2,10 @@
 import difflib
 from sys import stdout
 
-from helpers import get_last_schema, get_current_schema, compare_schemas
+from sqlibrist.helpers import get_last_schema, get_current_schema, compare_schemas
 
 
-def diff(config, args):
+def diff(args):
     last_schema = get_last_schema()
 
     current_schema = get_current_schema()

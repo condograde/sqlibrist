@@ -2,20 +2,16 @@
 import os
 from sys import stdout
 
-from helpers import get_connection
+from sqlibrist.helpers import get_connection, get_config
 
 
-
-def status(config, args):
+def status(args):
     """
     1. get applied migrations
     2. get all migrations
     3. check unapplied migrations
-
-    :param config:
-    :return:
     """
-
+    config = get_config(args)
     connection = get_connection(config)
 
     with connection:
