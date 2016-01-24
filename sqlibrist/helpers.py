@@ -7,6 +7,7 @@ import re
 from json import loads, dumps
 from sys import stdout
 
+import sys
 import yaml
 from yaml.scanner import ScannerError
 from sqlibrist.engines import Postgresql
@@ -222,11 +223,12 @@ def get_command_parser(parser=None):
     _parser.add_argument('--config-file', '-f',
                          help=u'Config file, default is sqlibrist.yaml',
                          type=str,
-                         default='sqlibrist.yaml')
+                         default=os.environ.get('SQLIBRIST_CONFIG_FILE',
+                                                'sqlibrist.yaml'))
     _parser.add_argument('--config', '-c',
                          help=u'Config name in config file, default is "default"',
                          type=str,
-                         default='default')
+                         default=os.environ.get('SQLIBRIST_CONFIG', 'default'))
 
     subparsers = _parser.add_subparsers(parser_class=argparse.ArgumentParser)
 
