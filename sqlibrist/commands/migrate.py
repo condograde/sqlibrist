@@ -42,7 +42,7 @@ def migrate(config, fake, till_migration_name):
             stdout.write(u'Error, rolled back\n')
         else:
             stdout.write(u'done\n')
-        if migration_name.startswith(till_migration_name):
+        if till_migration_name and migration_name.startswith(till_migration_name):
             break
 
 
