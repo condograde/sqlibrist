@@ -15,7 +15,7 @@ def unapplied_migrations(migration_list, last_migration):
             yield migration
 
 
-def migrate(config, fake):
+def migrate(config, fake, till_migration_name):
     engine = get_engine(config)
 
     last_applied_migration = engine.get_last_applied_migration()
@@ -42,7 +42,11 @@ def migrate(config, fake):
             stdout.write(u'Error, rolled back\n')
         else:
             stdout.write(u'done\n')
+        if migration_name.startswith(till_migration_name):
+            break
 
 
 def migrate_command(args):
-    return migrate(config=get_config(args), fake=args.fake)
+    return migrate(config=get_config(args),
+                   fake=args.fake,
+                   till_migration_name=args.migration)
