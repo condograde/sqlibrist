@@ -2,10 +2,11 @@
 import difflib
 from sys import stdout
 
-from sqlibrist.helpers import get_last_schema, get_current_schema, compare_schemas
+from sqlibrist.helpers import get_last_schema, get_current_schema, \
+    compare_schemas
 
 
-def diff(args):
+def diff(verbose):
     last_schema = get_last_schema()
 
     current_schema = get_current_schema()
@@ -27,9 +28,13 @@ def diff(args):
             stdout.write(u'Changed items:\n')
             for item in changed:
                 stdout.write(u'  %s\n' % item)
-                if args.verbose:
+                if verbose:
                     _diff = difflib.context_diff(last_schema[item]['up'],
                                                  current_schema[item]['up'])
                     stdout.write('\n'.join(_diff))
     else:
         stdout.write(u'No changes\n')
+
+
+def diff_command(args):
+    return diff(verbose=args.verbose)

@@ -1,4 +1,5 @@
 # -*- coding: utf8 -*-
+import argparse
 import glob
 import hashlib
 import os
@@ -6,9 +7,14 @@ import re
 from json import loads, dumps
 from sys import stdout
 
-import psycopg2
 import yaml
 from yaml.scanner import ScannerError
+from sqlibrist.engines import Postgresql
+
+
+ENGINES = {
+    'pg': Postgresql
+}
 
 
 class SqlibristException(Exception):
@@ -27,13 +33,17 @@ class BadConfig(SqlibristException):
     pass
 
 
+class ApplyMigrationFailed(SqlibristException):
+    pass
+
+
 def get_config(args):
     try:
         with open(args.config_file) as config_file:
             configs = yaml.load(config_file.read())
     except IOError:
         raise BadConfig(u'No config file %s found!' % args.config_file)
-    except ScannerError as e:
+    except ScannerError:
         raise BadConfig(u'Bad config file syntax')
     else:
         try:
@@ -42,14 +52,11 @@ def get_config(args):
             raise BadConfig(u'No config named %s found!' % args.config)
 
 
-def get_connection(config):
-    return psycopg2.connect(
-            database=config.get('name'),
-            user=config.get('user'),
-            host=config.get('host'),
-            password=config.get('password'),
-            port=config.get('port'),
-    )
+def get_engine(config):
+    try:
+        return ENGINES[config['engine']](config)
+    except KeyError:
+        raise BadConfig(u'DB engine not selected in config or wrong engine name (must be one of %s)' % u','.join(ENGINES.keys()))
 
 
 def get_last_schema():
@@ -190,25 +197,6 @@ def mark_affected_items(schema, name):
         mark_affected_items(schema, required)
 
 
-def initdb(config):
-    connection = get_connection(config)
-    stdout.write(u'Creating schema and migrations log table...\n')
-    with connection:
-        with connection.cursor() as cursor:
-            cursor.execute('''
-            create schema if not exists sqlibrist;
-            ''')
-
-            cursor.execute('''
-            create table if not exists sqlibrist.migrations (
-            id SERIAL PRIMARY key,
-            migration text,
-            datetime TIMESTAMPTZ DEFAULT current_timestamp
-            );
-            ''')
-    connection.close()
-
-
 def handle_exception(e):
     if isinstance(e, CircularDependencyException):
         stdout.write(u'Circular dependency:\n')
@@ -218,3 +206,91 @@ def handle_exception(e):
         stdout.write(u'Unknown dependency %s at %s\n' % e.message)
     elif isinstance(e, BadConfig):
         stdout.write(e.message + u'\n')
+
+
+def get_command_parser(parser=None):
+    from sqlibrist.commands.diff import diff_command
+    from sqlibrist.commands.init import init_command
+    from sqlibrist.commands.initdb import initdb_command
+    from sqlibrist.commands.makemigration import makemigration_command
+    from sqlibrist.commands.status import status_command
+    from sqlibrist.commands.test_connection import test_connection_command
+    from sqlibrist.commands.migrate import migrate_command
+
+    _parser = parser or argparse.ArgumentParser()
+    _parser.add_argument('--verbose', '-V', action='store_true', default=False)
+    _parser.add_argument('--config-file', '-f',
+                         help=u'Config file, default is sqlibrist.yaml',
+                         type=str,
+                         default='sqlibrist.yaml')
+    _parser.add_argument('--config', '-c',
+                         help=u'Config name in config file, default is "default"',
+                         type=str,
+                         default='default')
+
+    subparsers = _parser.add_subparsers(parser_class=argparse.ArgumentParser)
+
+    # test_connection
+    test_connection_parser = subparsers.add_parser('test_connection',
+                                                   help=u'Test DB connection')
+    test_connection_parser.set_defaults(func=test_connection_command)
+
+    # init
+    init_parser = subparsers.add_parser('init',
+                                        help=u'Init directory structure')
+    init_parser.set_defaults(func=init_command)
+
+    # initdb
+    initdb_parser = subparsers.add_parser('initdb',
+                                          help=u'Create DB table for migrations tracking')
+    initdb_parser.set_defaults(func=initdb_command)
+
+    # makemigrations
+    makemigration_parser = subparsers.add_parser('makemigration',
+                                                 help='Create new migration')
+    makemigration_parser.set_defaults(func=makemigration_command)
+    makemigration_parser.add_argument('--inplace',
+                                      help=u'Do not cascadely DROP-CREATE changed entities and their dependencies',
+                                      action='store_true',
+                                      default=False)
+    makemigration_parser.add_argument('--empty',
+                                      help=u'Create migration with empty up.sql for manual instructions',
+                                      action='store_true',
+                                      default=False)
+    makemigration_parser.add_argument('--name', '-n',
+                                      help=u'Optional migration name',
+                                      type=str,
+                                      default='')
+    makemigration_parser.add_argument('--dry-run',
+                                      help=u'Do not save migration',
+                                      action='store_true',
+                                      default=False)
+
+    # migrate
+    migrate_parser = subparsers.add_parser('migrate',
+                                           help=u'Apply pending migrations')
+    migrate_parser.set_defaults(func=migrate_command)
+    migrate_parser.add_argument('--fake',
+                                help=u'Mark pending migrations as applied',
+                                action='store_true',
+                                default=False)
+    migrate_parser.add_argument('--dry-run',
+                                help=u'Do not make actual changes to the DB',
+                                action='store_true',
+                                default=False)
+    migrate_parser.add_argument('--migration', '-m',
+                                help=u'Apply up to given migration number',
+                                type=str)
+    migrate_parser.add_argument('--revert',
+                                help=u'Unapply last migration',
+                                action='store_true')
+
+    # diff
+    diff_parser = subparsers.add_parser('diff', help=u'Show changes to schema')
+    diff_parser.set_defaults(func=diff_command)
+
+    # status
+    status_parser = subparsers.add_parser('status',
+                                          help=u'Show unapplied migrations')
+    status_parser.set_defaults(func=status_command)
+    return _parser

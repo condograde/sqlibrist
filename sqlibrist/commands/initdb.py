@@ -1,11 +1,16 @@
 # -*- coding: utf8 -*-
 from sys import stdout
 
-from sqlibrist.helpers import initdb as _initdb, get_config
+from sqlibrist.helpers import get_config, get_engine
 
 
-def initdb(args):
-    config = get_config(args)
+def initdb(config):
+    engine = get_engine(config)
+
     stdout.write(u'Creating db...\n')
-    _initdb(config)
+    engine.create_migrations_table()
     stdout.write(u'Done.\n')
+
+
+def initdb_command(args):
+    initdb(get_config(args))

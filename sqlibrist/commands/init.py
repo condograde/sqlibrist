@@ -6,6 +6,7 @@ import os
 DEFAULT_CONFIG_FILE = 'sqlibrist.yaml'
 DEFAULT_CONFIG = """---
 default:
+  engine: pg
   user: <username>
   name: <database_name>
   password: <password>
@@ -14,7 +15,7 @@ default:
 """
 
 
-def init(args):
+def init():
     stdout.write(u'Creating directories...\n')
     dirlist = (
         'schema',
@@ -36,3 +37,7 @@ def init(args):
         with open(DEFAULT_CONFIG_FILE, 'w') as f:
             f.write(DEFAULT_CONFIG)
     stdout.write(u'Done.\n')
+
+
+def init_command(args):
+    return init()

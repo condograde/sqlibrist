@@ -1,14 +1,14 @@
 # -*- coding: utf8 -*-
 from sys import stdout
 
-from sqlibrist.helpers import get_last_schema, save_migration, get_current_schema, \
-    compare_schemas, mark_affected_items
+from sqlibrist.helpers import get_last_schema, save_migration, \
+    get_current_schema, compare_schemas, mark_affected_items
 
 
-def makemigration(args):
+def makemigration(empty, dry_run, name):
     current_schema = get_current_schema()
 
-    if not args.empty:
+    if not empty:
         last_schema = get_last_schema() or {}
 
         added, removed, changed = compare_schemas(last_schema, current_schema)
@@ -54,13 +54,18 @@ def makemigration(args):
             for item in changed_items:
                 stdout.write(u'  %s\n' % item['name'])
 
-            execution_plan.extend([item['down'] for item in reversed(changed_items)])
+            execution_plan.extend(
+                    [item['down'] for item in reversed(changed_items)])
             execution_plan.extend([item['up'] for item in changed_items])
 
-        suffix = ('-%s' % args.name) or '-auto'
+        suffix = ('-%s' % name) or '-auto'
     else:
         execution_plan = []
-        suffix = ('-%s' % args.name) or '-manual'
+        suffix = ('-%s' % name) or '-manual'
 
-    if not args.dry_run:
+    if not dry_run:
         save_migration(current_schema, execution_plan, suffix)
+
+
+def makemigration_command(args):
+    return makemigration(name=args.name, dry_run=args.dry_run, empty=args.empty)
