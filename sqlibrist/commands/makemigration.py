@@ -5,7 +5,7 @@ from sqlibrist.helpers import get_last_schema, save_migration, \
     get_current_schema, compare_schemas, mark_affected_items
 
 
-def makemigration(empty, dry_run, name):
+def makemigration(empty, dry_run, migration_name):
     current_schema = get_current_schema()
 
     if not empty:
@@ -58,14 +58,14 @@ def makemigration(empty, dry_run, name):
                     [item['down'] for item in reversed(changed_items)])
             execution_plan.extend([item['up'] for item in changed_items])
 
-        suffix = ('-%s' % name) or '-auto'
+        suffix = ('-%s' % migration_name) or '-auto'
     else:
         execution_plan = []
-        suffix = ('-%s' % name) or '-manual'
+        suffix = ('-%s' % migration_name) or '-manual'
 
     if not dry_run:
         save_migration(current_schema, execution_plan, suffix)
 
 
 def makemigration_command(args):
-    return makemigration(name=args.name, dry_run=args.dry_run, empty=args.empty)
+    return makemigration(migration_name=args.name, dry_run=args.dry_run, empty=args.empty)

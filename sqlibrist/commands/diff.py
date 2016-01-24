@@ -29,9 +29,11 @@ def diff(verbose):
             for item in changed:
                 stdout.write(u'  %s\n' % item)
                 if verbose:
-                    _diff = difflib.context_diff(last_schema[item]['up'],
+                    _diff = difflib.unified_diff(last_schema[item]['up'],
                                                  current_schema[item]['up'])
                     stdout.write('\n'.join(_diff))
+                    stdout.write('\n')
+
     else:
         stdout.write(u'No changes\n')
 

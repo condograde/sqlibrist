@@ -185,7 +185,7 @@ def save_migration(schema, plan, suffix=''):
     with open(up_filename, 'w') as f:
         for item in plan:
             f.write('-- begin --\n')
-            f.write('\n'.join(item.encode('utf8')).strip())
+            f.write('\n'.join(map(lambda s: s.strip().encode('utf8'), item)))
             f.write('\n')
             f.write('-- end --\n')
             f.write('\n')
@@ -219,7 +219,7 @@ def get_command_parser(parser=None):
     from sqlibrist.commands.migrate import migrate_command
 
     _parser = parser or argparse.ArgumentParser()
-    _parser.add_argument('--verbose', '-V', action='store_true', default=False)
+    _parser.add_argument('--verbose', '-v', action='store_true', default=False)
     _parser.add_argument('--config-file', '-f',
                          help=u'Config file, default is sqlibrist.yaml',
                          type=str,
