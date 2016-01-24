@@ -219,7 +219,7 @@ def get_command_parser(parser=None):
     from sqlibrist.commands.migrate import migrate_command
 
     _parser = parser or argparse.ArgumentParser()
-    _parser.add_argument('--verbose', '-v', action='store_true', default=False)
+    _parser.add_argument('--verbose', '-V', action='store_true', default=False)
     _parser.add_argument('--config-file', '-f',
                          help=u'Config file, default is sqlibrist.yaml',
                          type=str,

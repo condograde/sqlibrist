@@ -75,8 +75,9 @@ class Postgresql(BaseEngine):
                 try:
                     if not fake:
                         cursor.execute(statements)
-                except (psycopg2.OperationalError, psycopg2.ProgrammingError):
+                except (psycopg2.OperationalError, psycopg2.ProgrammingError) as e:
                     connection.rollback()
+                    print(e.message)
                     from sqlibrist.helpers import ApplyMigrationFailed
 
                     raise ApplyMigrationFailed
