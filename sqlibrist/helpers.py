@@ -187,25 +187,19 @@ def save_migration(schema, plan_up, plan_down, suffix=''):
     with open(schema_filename, 'w') as f:
         f.write(dumps(schema, indent=2))
 
-    up_filename = os.path.join(dirname, 'up.sql')
-    with open(up_filename, 'w') as f:
-        for item in plan_up:
-            f.write('-- begin --\n')
-            f.write('\n'.join(map(lambda s: s.strip().encode('utf8'), item)))
-            f.write('\n')
-            f.write('-- end --\n')
-            f.write('\n')
-            f.write('\n')
-
-    down_filename = os.path.join(dirname, 'down.sql')
-    with open(down_filename, 'w') as f:
-        for item in plan_down:
-            f.write('-- begin --\n')
-            f.write('\n'.join(map(lambda s: s.strip().encode('utf8'), item)))
-            f.write('\n')
-            f.write('-- end --\n')
-            f.write('\n')
-            f.write('\n')
+    plans = (
+        ('up.sql', plan_up),
+        ('down.sql', plan_down),
+    )
+    for plan_name, instructions in plans:
+        with open(os.path.join(dirname, plan_name), 'w') as f:
+            for item in instructions:
+                f.write('-- begin --\n')
+                f.write(
+                    '\n'.join(map(lambda s: s.strip().encode('utf8'), item)))
+                f.write('\n')
+                f.write('-- end --\n')
+                f.write('\n\n')
 
 
 def mark_affected_items(schema, name):
@@ -222,7 +216,7 @@ def handle_exception(e):
     elif isinstance(e, UnknownDependencyException):
         stdout.write(u'Unknown dependency %s at %s\n' % e.message)
     elif isinstance(e, (BadConfig, MigrationIrreversible)):
-        stdout.write(e.message + u'\n')
+        stdout.write(u'%s\n' % e.message)
 
 
 def get_command_parser(parser=None):
