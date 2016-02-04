@@ -195,8 +195,7 @@ def save_migration(schema, plan_up, plan_down, suffix=''):
         with open(os.path.join(dirname, plan_name), 'w') as f:
             for item in instructions:
                 f.write('-- begin --\n')
-                f.write(
-                    '\n'.join(map(lambda s: s.strip().encode('utf8'), item)))
+                f.write(('\n'.join(map(lambda s: s.encode('utf8'), item))).strip())
                 f.write('\n')
                 f.write('-- end --\n')
                 f.write('\n\n')
