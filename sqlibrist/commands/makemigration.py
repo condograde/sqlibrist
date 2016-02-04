@@ -7,14 +7,13 @@ from sqlibrist.helpers import get_last_schema, save_migration, \
 
 def makemigration(empty, dry_run, migration_name):
     current_schema = get_current_schema()
+    execution_plan_up = []
+    execution_plan_down = []
 
     if not empty:
         last_schema = get_last_schema() or {}
 
         added, removed, changed = compare_schemas(last_schema, current_schema)
-
-        execution_plan_up = []
-        execution_plan_down = []
 
         removed_items = sorted([last_schema[name] for name in removed],
                                key=lambda i: i['degree'],
@@ -69,8 +68,6 @@ def makemigration(empty, dry_run, migration_name):
 
         default_suffix = 'auto'
     else:
-        execution_plan_up = []
-        execution_plan_down = []
         default_suffix = 'manual'
 
     suffix = ('-%s' % (migration_name or default_suffix))
