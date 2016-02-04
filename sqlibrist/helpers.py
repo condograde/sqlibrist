@@ -38,6 +38,12 @@ class ApplyMigrationFailed(SqlibristException):
     pass
 
 
+class MigrationIrreversible(SqlibristException):
+    pass
+
+
+
+
 def get_config(args):
     try:
         with open(args.config_file) as config_file:
@@ -215,7 +221,7 @@ def handle_exception(e):
         stdout.write(u'\n')
     elif isinstance(e, UnknownDependencyException):
         stdout.write(u'Unknown dependency %s at %s\n' % e.message)
-    elif isinstance(e, BadConfig):
+    elif isinstance(e, (BadConfig, MigrationIrreversible)):
         stdout.write(e.message + u'\n')
 
 
@@ -261,10 +267,12 @@ def get_command_parser(parser=None):
     makemigration_parser = subparsers.add_parser('makemigration',
                                                  help='Create new migration')
     makemigration_parser.set_defaults(func=makemigration_command)
-    makemigration_parser.add_argument('--inplace',
-                                      help=u'Do not cascadely DROP-CREATE changed entities and their dependencies',
-                                      action='store_true',
-                                      default=False)
+
+    # todo: not implemented
+    # makemigration_parser.add_argument('--inplace',
+    #                                   help=u'Do not cascadely DROP-CREATE changed entities and their dependencies',
+    #                                   action='store_true',
+    #                                   default=False)
     makemigration_parser.add_argument('--empty',
                                       help=u'Create migration with empty up.sql for manual instructions',
                                       action='store_true',
@@ -293,7 +301,7 @@ def get_command_parser(parser=None):
     migrate_parser.add_argument('--migration', '-m',
                                 help=u'Apply up to given migration number',
                                 type=str)
-    migrate_parser.add_argument('--revert',
+    migrate_parser.add_argument('--revert', '-r',
                                 help=u'Unapply last migration',
                                 action='store_true')
 
