@@ -172,7 +172,7 @@ def compare_schemas(last_schema, current_schema):
     return added, removed, changed
 
 
-def save_migration(schema, plan, suffix=''):
+def save_migration(schema, plan_up, plan_down, suffix=''):
     migration_name = '%04.f%s' % (len(glob.glob('migrations/*')) + 1, suffix)
     dirname = os.path.join('migrations', migration_name)
     stdout.write(u'Creating new migration %s\n' % migration_name)
@@ -183,7 +183,17 @@ def save_migration(schema, plan, suffix=''):
 
     up_filename = os.path.join(dirname, 'up.sql')
     with open(up_filename, 'w') as f:
-        for item in plan:
+        for item in plan_up:
+            f.write('-- begin --\n')
+            f.write('\n'.join(map(lambda s: s.strip().encode('utf8'), item)))
+            f.write('\n')
+            f.write('-- end --\n')
+            f.write('\n')
+            f.write('\n')
+
+    down_filename = os.path.join(dirname, 'down.sql')
+    with open(down_filename, 'w') as f:
+        for item in plan_down:
             f.write('-- begin --\n')
             f.write('\n'.join(map(lambda s: s.strip().encode('utf8'), item)))
             f.write('\n')

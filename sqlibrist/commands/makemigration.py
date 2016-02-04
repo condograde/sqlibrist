@@ -13,7 +13,8 @@ def makemigration(empty, dry_run, migration_name):
 
         added, removed, changed = compare_schemas(last_schema, current_schema)
 
-        execution_plan = []
+        execution_plan_up = []
+        execution_plan_down = []
 
         removed_items = sorted([last_schema[name] for name in removed],
                                key=lambda i: i['degree'],
@@ -23,7 +24,9 @@ def makemigration(empty, dry_run, migration_name):
             for item in removed_items:
                 print(u' %s' % item['name'])
 
-            execution_plan.extend([item['down'] for item in removed_items])
+            execution_plan_up.extend([item['down'] for item in removed_items])
+            execution_plan_down.extend([last_schema[item['name']]['up']
+                                        for item in removed_items])
 
         added_items = sorted([current_schema[name] for name in added],
                              key=lambda i: i['degree'])
@@ -33,7 +36,8 @@ def makemigration(empty, dry_run, migration_name):
             for item in added_items:
                 stdout.write(u' %s\n' % item['name'])
 
-            execution_plan.extend([item['up'] for item in added_items])
+            execution_plan_up.extend([item['up'] for item in added_items])
+            execution_plan_down.extend([item['down'] for item in added_items])
 
         for name in changed:
             current_schema[name]['status'] = 'changed'
@@ -53,18 +57,27 @@ def makemigration(empty, dry_run, migration_name):
             stdout.write(u' creating:\n')
             for item in changed_items:
                 stdout.write(u'  %s\n' % item['name'])
-            execution_plan.extend(
+            execution_plan_up.extend(
                     [last_schema[item['name']]['down']
                      for item in reversed(changed_items)])
-            execution_plan.extend([item['up'] for item in changed_items])
+            execution_plan_up.extend([item['up'] for item in changed_items])
+
+            execution_plan_down.extend(
+                    [last_schema[item['name']]['up']
+                     for item in reversed(changed_items)])
+            execution_plan_down.extend([item['down'] for item in changed_items])
 
         suffix = ('-%s' % (migration_name or 'auto'))
     else:
-        execution_plan = []
+        execution_plan_up = []
+        execution_plan_down = []
         suffix = ('-%s' % (migration_name or 'manual'))
 
     if not dry_run:
-        save_migration(current_schema, execution_plan, suffix)
+        save_migration(current_schema,
+                       execution_plan_up,
+                       reversed(execution_plan_down),
+                       suffix)
 
 
 def makemigration_command(args):
