@@ -58,10 +58,10 @@ def makemigration(empty, dry_run, migration_name):
                     [item['down'] for item in reversed(changed_items)])
             execution_plan.extend([item['up'] for item in changed_items])
 
-        suffix = ('-%s' % migration_name) or '-auto'
+        suffix = ('-%s' % (migration_name or 'auto'))
     else:
         execution_plan = []
-        suffix = ('-%s' % migration_name) or '-manual'
+        suffix = ('-%s' % (migration_name or 'manual'))
 
     if not dry_run:
         save_migration(current_schema, execution_plan, suffix)
