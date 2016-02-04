@@ -53,9 +53,9 @@ def makemigration(empty, dry_run, migration_name):
             stdout.write(u' creating:\n')
             for item in changed_items:
                 stdout.write(u'  %s\n' % item['name'])
-
             execution_plan.extend(
-                    [item['down'] for item in reversed(changed_items)])
+                    [last_schema[item['name']]['down']
+                     for item in reversed(changed_items)])
             execution_plan.extend([item['up'] for item in changed_items])
 
         suffix = ('-%s' % (migration_name or 'auto'))
