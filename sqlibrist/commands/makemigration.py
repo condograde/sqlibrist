@@ -52,19 +52,24 @@ def makemigration(empty, dry_run, migration_name):
             stdout.write(u'Updating:\n')
             stdout.write(u' dropping:\n')
             for item in reversed(changed_items):
-                stdout.write(u'  %s\n' % item['name'])
+                if item['down']:
+                    stdout.write(u'  %s\n' % item['name'])
             stdout.write(u' creating:\n')
             for item in changed_items:
-                stdout.write(u'  %s\n' % item['name'])
+                if item['down']:
+                    stdout.write(u'  %s\n' % item['name'])
             execution_plan_up.extend(
                     [last_schema[item['name']]['down']
-                     for item in reversed(changed_items)])
-            execution_plan_up.extend([item['up'] for item in changed_items])
+                     for item in reversed(changed_items) if last_schema[item['name']]['down']])
+
+            execution_plan_up.append([u'-- ==== Add your instruction here ===='])
+
+            execution_plan_up.extend([item['up'] for item in changed_items if item['down']])
 
             execution_plan_down.extend(
                     [last_schema[item['name']]['up']
-                     for item in reversed(changed_items)])
-            execution_plan_down.extend([item['down'] for item in changed_items])
+                     for item in reversed(changed_items) if last_schema[item['name']]['down']])
+            execution_plan_down.extend([item['down'] for item in changed_items if item['down']])
 
         default_suffix = 'auto'
     else:
