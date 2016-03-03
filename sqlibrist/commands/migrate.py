@@ -8,7 +8,7 @@ from sqlibrist.helpers import get_engine, get_config, ApplyMigrationFailed, \
 
 
 def unapplied_migrations(migration_list, last_migration):
-    on = False
+    on = not last_migration
     for migration in migration_list:
         if migration.split('/')[-1] == last_migration:
             on = True

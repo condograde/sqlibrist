@@ -21,11 +21,10 @@ def makemigration(empty, dry_run, migration_name):
         if removed_items:
             stdout.write(u'Deleting:\n')
             for item in removed_items:
-                print(u' %s' % item['name'])
+                stdout.write(u' %s\n' % item['name'])
 
-            execution_plan_up.extend([item['down'] for item in removed_items])
-            execution_plan_down.extend([last_schema[item['name']]['up']
-                                        for item in removed_items])
+                execution_plan_up.append(item['down'])
+                execution_plan_down.append(last_schema[item['name']]['up'])
 
         added_items = sorted([current_schema[name] for name in added],
                              key=lambda i: i['degree'])
@@ -35,8 +34,8 @@ def makemigration(empty, dry_run, migration_name):
             for item in added_items:
                 stdout.write(u' %s\n' % item['name'])
 
-            execution_plan_up.extend([item['up'] for item in added_items])
-            execution_plan_down.extend([item['down'] for item in added_items])
+                execution_plan_up.append(item['up'])
+                execution_plan_down.append(item['down'])
 
         for name in changed:
             current_schema[name]['status'] = 'changed'
@@ -54,22 +53,23 @@ def makemigration(empty, dry_run, migration_name):
             for item in reversed(changed_items):
                 if item['down']:
                     stdout.write(u'  %s\n' % item['name'])
+
+                if item['name'] in last_schema \
+                        and last_schema[item['name']]['down']:
+                    execution_plan_up.append(last_schema[item['name']]['down'])
+                    execution_plan_down.append(last_schema[item['name']]['up'])
+                elif item['name'] not in last_schema and item['name']['down']:
+                    execution_plan_up.append(item['name']['down'])
+
+            execution_plan_up.append(
+                [u'-- ==== Add your instruction here ===='])
+
             stdout.write(u' creating:\n')
             for item in changed_items:
                 if item['down']:
                     stdout.write(u'  %s\n' % item['name'])
-            execution_plan_up.extend(
-                    [last_schema[item['name']]['down']
-                     for item in reversed(changed_items) if last_schema[item['name']]['down']])
-
-            execution_plan_up.append([u'-- ==== Add your instruction here ===='])
-
-            execution_plan_up.extend([item['up'] for item in changed_items if item['down']])
-
-            execution_plan_down.extend(
-                    [last_schema[item['name']]['up']
-                     for item in reversed(changed_items) if last_schema[item['name']]['down']])
-            execution_plan_down.extend([item['down'] for item in changed_items if item['down']])
+                    execution_plan_up.append(item['up'])
+                    execution_plan_down.append(item['down'])
 
         default_suffix = 'auto'
     else:
