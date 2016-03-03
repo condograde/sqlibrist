@@ -15,17 +15,6 @@ def makemigration(empty, dry_run, migration_name):
 
         added, removed, changed = compare_schemas(last_schema, current_schema)
 
-        removed_items = sorted([last_schema[name] for name in removed],
-                               key=lambda i: i['degree'],
-                               reverse=True)
-        if removed_items:
-            stdout.write(u'Deleting:\n')
-            for item in removed_items:
-                stdout.write(u' %s\n' % item['name'])
-
-                execution_plan_up.append(item['down'])
-                execution_plan_down.append(last_schema[item['name']]['up'])
-
         added_items = sorted([current_schema[name] for name in added],
                              key=lambda i: i['degree'])
 
@@ -70,6 +59,18 @@ def makemigration(empty, dry_run, migration_name):
                     stdout.write(u'  %s\n' % item['name'])
                     execution_plan_up.append(item['up'])
                     execution_plan_down.append(item['down'])
+
+        removed_items = sorted(
+            [last_schema[name] for name in removed],
+            key=lambda i: i['degree'],
+            reverse=True)
+        if removed_items:
+            stdout.write(u'Deleting:\n')
+            for item in removed_items:
+                stdout.write(u' %s\n' % item['name'])
+
+                execution_plan_up.append(item['down'])
+                execution_plan_down.append(last_schema[item['name']]['up'])
 
         default_suffix = 'auto'
     else:
