@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
+from __future__ import print_function
 import os
-from sys import stdout
 
 from sqlibrist.helpers import get_engine, get_config
 
@@ -18,9 +18,9 @@ def status(config):
     all_migrations = sorted(os.listdir('migrations/'))
     for i, migration in enumerate(all_migrations):
         if migration in applied_migrations:
-            stdout.write(u'Migration %s - applied\n' % migration)
+            print('Migration %s - applied' % migration)
         else:
-            stdout.write(u'Migration %s - NOT applied\n' % migration)
+            print('Migration %s - NOT applied' % migration)
 
 
 def status_command(args):

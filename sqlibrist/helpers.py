@@ -1,13 +1,12 @@
 # -*- coding: utf8 -*-
+from __future__ import print_function
 import argparse
 import glob
 import hashlib
 import os
 import re
 from json import loads, dumps
-from sys import stdout
 
-import sys
 import yaml
 from yaml.scanner import ScannerError
 from sqlibrist.engines import Postgresql
@@ -49,21 +48,22 @@ def get_config(args):
         with open(args.config_file) as config_file:
             configs = yaml.load(config_file.read())
     except IOError:
-        raise BadConfig(u'No config file %s found!' % args.config_file)
+        raise BadConfig('No config file %s found!' % args.config_file)
     except ScannerError:
-        raise BadConfig(u'Bad config file syntax')
+        raise BadConfig('Bad config file syntax')
     else:
         try:
             return configs[args.config]
         except KeyError:
-            raise BadConfig(u'No config named %s found!' % args.config)
+            raise BadConfig('No config named %s found!' % args.config)
 
 
 def get_engine(config):
     try:
         return ENGINES[config['engine']](config)
     except KeyError:
-        raise BadConfig(u'DB engine not selected in config or wrong engine name (must be one of %s)' % u','.join(ENGINES.keys()))
+        raise BadConfig('DB engine not selected in config or wrong engine '
+                        'name (must be one of %s)' % ','.join(ENGINES.keys()))
 
 
 def get_last_schema():
@@ -181,7 +181,7 @@ def compare_schemas(last_schema, current_schema):
 def save_migration(schema, plan_up, plan_down, suffix=''):
     migration_name = '%04.f%s' % (len(glob.glob('migrations/*')) + 1, suffix)
     dirname = os.path.join('migrations', migration_name)
-    stdout.write(u'Creating new migration %s\n' % migration_name)
+    print('Creating new migration %s' % migration_name)
     os.mkdir(dirname)
     schema_filename = os.path.join(dirname, 'schema.json')
     with open(schema_filename, 'w') as f:
@@ -195,7 +195,8 @@ def save_migration(schema, plan_up, plan_down, suffix=''):
         with open(os.path.join(dirname, plan_name), 'w') as f:
             for item in instructions:
                 f.write('-- begin --\n')
-                f.write(('\n'.join(map(lambda s: s.encode('utf8'), item))).strip())
+                f.write(('\n'.join(map(lambda s: s.encode('utf8'),
+                                       item))).strip())
                 f.write('\n')
                 f.write('-- end --\n')
                 f.write('\n\n')
@@ -209,13 +210,12 @@ def mark_affected_items(schema, name):
 
 def handle_exception(e):
     if isinstance(e, CircularDependencyException):
-        stdout.write(u'Circular dependency:\n')
-        stdout.write(u'  %s' % u' >\n  '.join(e.message))
-        stdout.write(u'\n')
+        print('Circular dependency:')
+        print('  %s' % ' >\n  '.join(e.message))
     elif isinstance(e, UnknownDependencyException):
-        stdout.write(u'Unknown dependency %s at %s\n' % e.message)
+        print('Unknown dependency %s at %s' % e.message)
     elif isinstance(e, (BadConfig, MigrationIrreversible)):
-        stdout.write(u'%s\n' % e.message)
+        print(e.message)
 
 
 def get_command_parser(parser=None):
@@ -230,12 +230,13 @@ def get_command_parser(parser=None):
     _parser = parser or argparse.ArgumentParser()
     _parser.add_argument('--verbose', '-V', action='store_true', default=False)
     _parser.add_argument('--config-file', '-f',
-                         help=u'Config file, default is sqlibrist.yaml',
+                         help='Config file, default is sqlibrist.yaml',
                          type=str,
                          default=os.environ.get('SQLIBRIST_CONFIG_FILE',
                                                 'sqlibrist.yaml'))
     _parser.add_argument('--config', '-c',
-                         help=u'Config name in config file, default is "default"',
+                         help='Config name in config file, '
+                              'default is "default"',
                          type=str,
                          default=os.environ.get('SQLIBRIST_CONFIG', 'default'))
 
@@ -243,17 +244,18 @@ def get_command_parser(parser=None):
 
     # test_connection
     test_connection_parser = subparsers.add_parser('test_connection',
-                                                   help=u'Test DB connection')
+                                                   help='Test DB connection')
     test_connection_parser.set_defaults(func=test_connection_command)
 
     # init
     init_parser = subparsers.add_parser('init',
-                                        help=u'Init directory structure')
+                                        help='Init directory structure')
     init_parser.set_defaults(func=init_command)
 
     # initdb
     initdb_parser = subparsers.add_parser('initdb',
-                                          help=u'Create DB table for migrations tracking')
+                                          help='Create DB table for '
+                                               'migrations tracking')
     initdb_parser.set_defaults(func=initdb_command)
 
     # makemigrations
@@ -267,43 +269,44 @@ def get_command_parser(parser=None):
     #                                   action='store_true',
     #                                   default=False)
     makemigration_parser.add_argument('--empty',
-                                      help=u'Create migration with empty up.sql for manual instructions',
+                                      help='Create migration with empty up.sql '
+                                           'for manual instructions',
                                       action='store_true',
                                       default=False)
     makemigration_parser.add_argument('--name', '-n',
-                                      help=u'Optional migration name',
+                                      help='Optional migration name',
                                       type=str,
                                       default='')
     makemigration_parser.add_argument('--dry-run',
-                                      help=u'Do not save migration',
+                                      help='Do not save migration',
                                       action='store_true',
                                       default=False)
 
     # migrate
     migrate_parser = subparsers.add_parser('migrate',
-                                           help=u'Apply pending migrations')
+                                           help='Apply pending migrations')
     migrate_parser.set_defaults(func=migrate_command)
     migrate_parser.add_argument('--fake',
-                                help=u'Mark pending migrations as applied',
+                                help='Mark pending migrations as applied',
                                 action='store_true',
                                 default=False)
     migrate_parser.add_argument('--dry-run',
-                                help=u'Do not make actual changes to the DB',
+                                help='Do not make actual changes to the DB',
                                 action='store_true',
                                 default=False)
     migrate_parser.add_argument('--migration', '-m',
-                                help=u'Apply up to given migration number',
+                                help='Apply up to given migration number',
                                 type=str)
     migrate_parser.add_argument('--revert', '-r',
-                                help=u'Unapply last migration',
+                                help='Unapply last migration',
                                 action='store_true')
 
     # diff
-    diff_parser = subparsers.add_parser('diff', help=u'Show changes to schema')
+    diff_parser = subparsers.add_parser('diff', help='Show changes to schema')
     diff_parser.set_defaults(func=diff_command)
 
     # status
     status_parser = subparsers.add_parser('status',
-                                          help=u'Show unapplied migrations')
+                                          help='Show unapplied migrations')
     status_parser.set_defaults(func=status_command)
     return _parser

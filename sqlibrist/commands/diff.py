@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
+from __future__ import print_function
 import difflib
-from sys import stdout
 
 from sqlibrist.helpers import get_last_schema, get_current_schema, \
     compare_schemas
@@ -15,27 +15,26 @@ def diff(verbose):
 
     if any((added, removed, changed)):
         if added:
-            stdout.write(u'New items:\n')
+            print('New items:')
             for item in added:
-                stdout.write(u'  %s\n' % item)
+                print('  %s' % item)
 
         if removed:
-            stdout.write(u'Removed items:\n')
+            print('Removed items:')
             for item in removed:
-                stdout.write(u'  %s\n' % item)
+                print('  %s' % item)
 
         if changed:
-            stdout.write(u'Changed items:\n')
+            print('Changed items:')
             for item in changed:
-                stdout.write(u'  %s\n' % item)
+                print('  %s' % item)
                 if verbose:
                     _diff = difflib.unified_diff(last_schema[item]['up'],
                                                  current_schema[item]['up'])
-                    stdout.write('\n'.join(_diff))
-                    stdout.write('\n')
+                    print('\n'.join(_diff))
 
     else:
-        stdout.write(u'No changes\n')
+        print('No changes')
 
 
 def diff_command(args):

@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from sys import stdout
+from __future__ import print_function
 
 from sqlibrist.helpers import get_engine, get_config
 
@@ -9,7 +9,7 @@ def test_connection(config):
 
     connection = engine.get_connection()
 
-    stdout.write(u'Connection OK\n')
+    print('Connection OK')
     connection.close()
 
 

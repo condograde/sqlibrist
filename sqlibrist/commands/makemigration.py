@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from sys import stdout
+from __future__ import print_function
 
 from sqlibrist.helpers import get_last_schema, save_migration, \
     get_current_schema, compare_schemas, mark_affected_items
@@ -19,9 +19,9 @@ def makemigration(empty, dry_run, migration_name):
                              key=lambda i: i['degree'])
 
         if added_items:
-            stdout.write(u'Creating:\n')
+            print('Creating:')
             for item in added_items:
-                stdout.write(u' %s\n' % item['name'])
+                print(' %s' % item['name'])
 
                 execution_plan_up.append(item['up'])
                 execution_plan_down.append(item['down'])
@@ -32,16 +32,16 @@ def makemigration(empty, dry_run, migration_name):
             mark_affected_items(current_schema, name)
 
         changed_items = sorted([item
-                                for item in current_schema.itervalues()
+                                for item in current_schema.values()
                                 if item.get('status') == 'changed'],
                                key=lambda i: i['degree'])
 
         if changed_items:
-            stdout.write(u'Updating:\n')
-            stdout.write(u' dropping:\n')
+            print('Updating:')
+            print(' dropping:')
             for item in reversed(changed_items):
                 if item['down']:
-                    stdout.write(u'  %s\n' % item['name'])
+                    print('  %s' % item['name'])
 
                 if item['name'] in last_schema \
                         and last_schema[item['name']]['down']:
@@ -51,12 +51,12 @@ def makemigration(empty, dry_run, migration_name):
                     execution_plan_up.append(item['name']['down'])
 
             execution_plan_up.append(
-                [u'-- ==== Add your instruction here ===='])
+                ['-- ==== Add your instruction here ===='])
 
-            stdout.write(u' creating:\n')
+            print(' creating:')
             for item in changed_items:
                 if item['down']:
-                    stdout.write(u'  %s\n' % item['name'])
+                    print('  %s' % item['name'])
                     execution_plan_up.append(item['up'])
                     execution_plan_down.append(item['down'])
 
@@ -65,9 +65,9 @@ def makemigration(empty, dry_run, migration_name):
             key=lambda i: i['degree'],
             reverse=True)
         if removed_items:
-            stdout.write(u'Deleting:\n')
+            print('Deleting:')
             for item in removed_items:
-                stdout.write(u' %s\n' % item['name'])
+                print(' %s' % item['name'])
 
                 execution_plan_up.append(item['down'])
                 execution_plan_down.append(last_schema[item['name']]['up'])

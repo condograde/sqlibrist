@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from sys import stdout
+from __future__ import print_function
 
 import os
 
@@ -16,7 +16,7 @@ default:
 
 
 def init():
-    stdout.write(u'Creating directories...\n')
+    print('Creating directories...')
     dirlist = (
         'schema',
         'schema/tables',
@@ -36,7 +36,7 @@ def init():
     if not os.path.isfile(DEFAULT_CONFIG_FILE):
         with open(DEFAULT_CONFIG_FILE, 'w') as f:
             f.write(DEFAULT_CONFIG)
-    stdout.write(u'Done.\n')
+    print('Done.')
 
 
 def init_command(args):

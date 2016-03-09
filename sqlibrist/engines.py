@@ -1,6 +1,5 @@
 # -*- coding: utf8 -*-
-from __future__ import absolute_import
-from sys import stdout
+from __future__ import absolute_import, print_function
 
 
 class BaseEngine(object):
@@ -27,16 +26,16 @@ class Postgresql(BaseEngine):
     def get_connection(self):
         import psycopg2
         return psycopg2.connect(
-                database=self.config.get('name'),
-                user=self.config.get('user'),
-                host=self.config.get('host'),
-                password=self.config.get('password'),
-                port=self.config.get('port'),
+            database=self.config.get('name'),
+            user=self.config.get('user'),
+            host=self.config.get('host'),
+            password=self.config.get('password'),
+            port=self.config.get('port'),
         )
 
     def create_migrations_table(self):
         connection = self.get_connection()
-        stdout.write(u'Creating schema and migrations log table...\n')
+        print('Creating schema and migrations log table...\n')
         with connection:
             with connection.cursor() as cursor:
                 cursor.execute('CREATE SCHEMA IF NOT EXISTS sqlibrist;')
@@ -78,16 +77,17 @@ class Postgresql(BaseEngine):
                 try:
                     if not fake:
                         cursor.execute(statements)
-                except (psycopg2.OperationalError, psycopg2.ProgrammingError) as e:
+                except (
+                psycopg2.OperationalError, psycopg2.ProgrammingError) as e:
                     connection.rollback()
                     print(e.message)
                     from sqlibrist.helpers import ApplyMigrationFailed
 
                     raise ApplyMigrationFailed
                 else:
-                    cursor.execute(
-                            '''INSERT INTO sqlibrist.migrations (migration) VALUES (%s); ''',
-                            [name.split('/')[-1]])
+                    cursor.execute('INSERT INTO sqlibrist.migrations '
+                                   '(migration) VALUES (%s);',
+                                   [name.split('/')[-1]])
                     connection.commit()
 
     def unapply_migration(self, name, statements, fake=False):
@@ -98,16 +98,14 @@ class Postgresql(BaseEngine):
                 try:
                     if not fake:
                         cursor.execute(statements)
-                except (psycopg2.OperationalError, psycopg2.ProgrammingError) as e:
+                except (
+                psycopg2.OperationalError, psycopg2.ProgrammingError) as e:
                     connection.rollback()
                     print(e.message)
                     from sqlibrist.helpers import ApplyMigrationFailed
 
                     raise ApplyMigrationFailed
                 else:
-                    cursor.execute(
-                            '''DELETE FROM sqlibrist.migrations where migration = (%s); ''',
-                            [name])
+                    cursor.execute('DELETE FROM sqlibrist.migrations '
+                                   'WHERE migration = (%s); ', [name])
                     connection.commit()
-
-
