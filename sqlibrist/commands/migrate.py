@@ -67,6 +67,7 @@ def migrate(config, fake, revert, till_migration_name):
             engine.apply_migration(migration_name, up, fake)
         except ApplyMigrationFailed:
             print('Error, rolled back')
+            break
         else:
             print('done')
         if till_migration_name \
