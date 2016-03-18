@@ -75,7 +75,7 @@ class Postgresql(BaseEngine):
         with connection:
             with connection.cursor() as cursor:
                 try:
-                    if not fake:
+                    if not fake and statements.strip():
                         cursor.execute(statements)
                 except (
                 psycopg2.OperationalError, psycopg2.ProgrammingError) as e:

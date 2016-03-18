@@ -10,7 +10,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='sqlibrist',
-    version='0.0.2',
+    version='0.0.3',
     packages=['sqlibrist'],
     include_package_data=True,
     license='MIT License',
@@ -38,7 +38,7 @@ setup(
         'Topic :: Database :: Database Engines/Servers',
         'Topic :: Utilities',
     ],
-    keywords='db structure, sql, schema migration',
+    keywords='sqlibrist, db structure, sql, schema migration',
     entry_points={
         'console_scripts': [
             'sqlibrist=sqlibrist:main'
