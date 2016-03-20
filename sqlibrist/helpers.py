@@ -41,8 +41,6 @@ class MigrationIrreversible(SqlibristException):
     pass
 
 
-
-
 def get_config(args):
     try:
         with open(args.config_file) as config_file:
@@ -218,6 +216,11 @@ def handle_exception(e):
         print(e.message)
 
 
+def print_version(_):
+    from sqlibrist import VERSION
+    print(VERSION)
+
+
 def get_command_parser(parser=None):
     from sqlibrist.commands.diff import diff_command
     from sqlibrist.commands.init import init_command
@@ -241,6 +244,11 @@ def get_command_parser(parser=None):
                          default=os.environ.get('SQLIBRIST_CONFIG', 'default'))
 
     subparsers = _parser.add_subparsers(parser_class=argparse.ArgumentParser)
+
+    # print version
+    test_connection_parser = subparsers.add_parser('version',
+                                                   help='Print sqlibrist version')
+    test_connection_parser.set_defaults(func=print_version)
 
     # test_connection
     test_connection_parser = subparsers.add_parser('test_connection',

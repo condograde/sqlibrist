@@ -7,7 +7,7 @@ from contextlib import contextmanager
 
 from django.core.management import BaseCommand
 
-from sqlibrist.django_app.settings import SQLIBRIST_DIRECTORY
+from django_sqlibrist.settings import SQLIBRIST_DIRECTORY
 from sqlibrist.helpers import get_command_parser, SqlibristException, \
     handle_exception
 

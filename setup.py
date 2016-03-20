@@ -1,17 +1,17 @@
 # -*- coding: utf8 -*-
+import sqlibrist
 import os
 from setuptools import setup
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
     README = readme.read()
 
-# allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='sqlibrist',
-    version='0.0.3',
-    packages=['sqlibrist'],
+    version=sqlibrist.VERSION,
+    packages=['sqlibrist', 'django_sqlibrist'],
     include_package_data=True,
     license='MIT License',
     description='Simple tool for managing DB structure, automating patch '

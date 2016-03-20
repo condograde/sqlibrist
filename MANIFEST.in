@@ -4,3 +4,4 @@ include LICENSE
 include README.rst
 
 recursive-include sqlibrist *.py
+recursive-include django_sqlibrist *.py
