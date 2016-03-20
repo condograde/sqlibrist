@@ -10,11 +10,11 @@ objects.
 
 Sqlibrist makes the process of creating SQL patches much more easy and proposes
 a way to organize your SQL code. All database objects are described declaratively
-in separate files in the form of `CREATE TABLE` or `CREATE FUNCTION`, having
+in separate files in the form of *CREATE TABLE* or *CREATE FUNCTION*, having
 dependency instructions.
 
 The whole thing is inspired by Sqitch (see Alternatives below) and Django Migrations (may be you
-remember Django South). Every time you invoke `makemigration` command, snapshot
+remember Django South). Every time you invoke *makemigration* command, snapshot
 of current scheme is made and compared with previous snapshot. Then, SQL patch
 is created with instructions to recreate all changed objects cascadely with their
 dependencies, create new or remove deleted. In the latter case, sqlibrist will not
@@ -85,7 +85,7 @@ You will get the following DB structure::
             types
             views
 
-In `sqlibrist.yaml` you will configure DB connections::
+In *sqlibrist.yaml* you will configure DB connections::
 
     ---
     default:
@@ -96,7 +96,7 @@ In `sqlibrist.yaml` you will configure DB connections::
     # host: 127.0.0.1
     # port: 5432
 
-`host` and `port` are optional.
+*host* and *port* are optional.
 
 Once you configured DB connection, test if is correct::
 
@@ -113,7 +113,7 @@ Next we need to create sqlibrist migrations table::
 
 Now we are ready to build our DB schema.
 
-Create file `shop_schema/schema/tables/user.sql`::
+Create file **shop_schema/schema/tables/user.sql**::
 
     --UP
     CREATE TABLE "user" (
@@ -121,13 +121,13 @@ Create file `shop_schema/schema/tables/user.sql`::
     name TEXT,
     password TEXT);
 
-The first line `--UP` means that the following are SQL stateents for 'forward'
-migration. The opposite is optional `--DOWN`, which contains instructions for reverting.
+The first line *--UP* means that the following are SQL stateents for 'forward'
+migration. The opposite is optional *--DOWN*, which contains instructions for reverting.
 To be safe, and not accidentally drop any table with your data, we will not include
-anything like DROP TABLE. Working with table upgrades and `--DOWN` is on the way
+anything like DROP TABLE. Working with table upgrades and *--DOWN* is on the way
 below.
 
-`shop_schema/schema/tables/product.sql`::
+**shop_schema/schema/tables/product.sql**::
 
     --UP
     CREATE TABLE product (
@@ -135,7 +135,7 @@ below.
     name TEXT,
     price MONEY);
 
-`shop_schema/schema/tables/order.sql`::
+**shop_schema/schema/tables/order.sql**::
 
     --REQ tables/user
     --UP
@@ -144,11 +144,11 @@ below.
     user_id INTEGER REFERENCES "user"(id),
     date DATE);
 
-Important here is the `--REQ tables/user` statement. It tells sqlibrist, that
-`order` table depends on `user` table. This will guarantee, that `user` will
-be created before `order`.
+Important here is the *--REQ tables/user* statement. It tells sqlibrist, that
+*order* table depends on *user* table. This will guarantee, that *user* will
+be created before *order*.
 
-`shop_schema/schema/tables/order_product.sql`::
+**shop_schema/schema/tables/order_product.sql**::
 
     --REQ tables/order
     --UP
@@ -168,21 +168,21 @@ Ok, now let's create our first migration::
      tables/order_product
     Creating new migration 0001-initial
 
-New files were created in `shop_schema/migrations/0001-initial`::
+New files were created in **shop_schema/migrations/0001-initial**::
 
     up.sql
     down.sql
     schema.json
 
-`up.sql` contains SQL to apply your changes (create tables), `down.sql` has nothing
-notable, since our .sql files have no `--DOWN` section, and the `schema.json`
+**up.sql** contains SQL to apply your changes (create tables), **down.sql** has nothing
+notable, since our .sql files have no *--DOWN* section, and the **schema.json**
 has snapshot of current schema.
 
 If you want to make more changes to the schema files prior to applying newly created
-migration, delete the directory with those 3 files, in our case `0001-initial`.
+migration, delete the directory with those 3 files, in our case **0001-initial**.
 
-You are free to review and edit up.sql and down.sql, of course if you know what
-you are doing. DO NOT edit schema.json.
+You are free to review and edit **up.sql** and **down.sql**, of course if you know what
+you are doing. **DO NOT edit schema.json**.
 
 Now go ahead and apply our migration::
 
@@ -193,7 +193,7 @@ Well done! Tables are created, but let's do something more interesting.
 
 We will create view that shows all user orders with order total:
 
-`shop_schema/schema/views/user_orders.sql`::
+**shop_schema/schema/views/user_orders.sql**::
 
     --REQ tables/user
     --REQ tables/order
@@ -219,7 +219,7 @@ We will create view that shows all user orders with order total:
 
 ... and function to return only given user's orders:
 
-`shop_schema/schema/functions/get_user_orders.sql`::
+**shop_schema/schema/functions/get_user_orders.sql**::
 
     --REQ views/user_orders
 
@@ -249,19 +249,19 @@ Next create new migration and apply it::
 
 We have four tables, one view and one function.
 
-Now you want to add one more field in the `user_orders` view. There can be couple
+Now you want to add one more field in the *user_orders* view. There can be couple
 of issues here:
 
     - we could try to drop and create updated view, but the database server will
-    complain, that `get_user_orders` function depends on droppable view;
+    complain, that *get_user_orders* function depends on droppable view;
 
     - we could be smart and create view with 'CREATE OR REPLACE VIEW user_orders...',
     however single view's fields and their types make separate type, and the
-    function `get_user_orders` returns that type. We can't simply change view type
+    function *get_user_orders* returns that type. We can't simply change view type
     without recreating the function.
 
-This is where sqlibrist comes to help. Add one more field `SUM(op.quantity) as order_total`
-to the `user_orders` view::
+This is where sqlibrist comes to help. Add one more field *SUM(op.quantity) as order_total*
+to the *user_orders* view::
 
     --REQ tables/user
     --REQ tables/order
@@ -319,25 +319,25 @@ Now let's make migration::
       functions/get_user_orders
     Creating new migration 0003-auto
 
-You can see, that sqlibrist first drops `get_user_orders` function, after that
-`user_orders` view does not have dependent objects and can be dropped too.
+You can see, that sqlibrist first drops *get_user_orders* function, after that
+*user_orders* view does not have dependent objects and can be dropped too.
 Then view and function are created in order, opposite to dropping.
 Ally our changes:
 
     $ sqlibrist migrate
     Applying migration 0003-auto... done
 
-Last topic is to make change to table structure. Since we did not add `--DROP` section
+Last topic is to make change to table structure. Since we did not add *--DROP* section
 to our tables, any change has to be made manually. This is done in several steps:
 
     1. Edit CREATE TABLE definition to reflect new structure;
-    2. Generate new migration with `makemigration` command;
-    3. Manually edit new migration's `up.sql` with ALTER TABLE instructions.
+    2. Generate new migration with *makemigration* command;
+    3. Manually edit new migration's *up.sql* with ALTER TABLE instructions.
 
-To demonstrate this, let's add field `type text` to the `product` table. It will
+To demonstrate this, let's add field *type text* to the *product* table. It will
 look like this:
 
-`shop_schema/schema/tables/product.sql`::
+**shop_schema/schema/tables/product.sql**::
 
     --UP
     CREATE TABLE product (
@@ -359,19 +359,20 @@ This was #1. Next create new migration::
     Creating new migration 0004-new product field
 
 Please, pay attention here, that even though we changed product table definition,
-`tables/product` is not in migration process, but ALL dependent objects are recreated.
+*tables/product* is not in migration process, but ALL dependent objects are recreated.
 This behavior is intended. This was #2.
 
-Now #3: open `shop_schema/migrations/0004-new product field/up.sql` with your editor and look for line 12
-with text `-- ==== Add your instruction here ====`. This is the point in migration when
-all dependent objects are dropped and you can issue ALTER TABLE instructions.
+Now #3: open **shop_schema/migrations/0004-new product field/up.sql** with your editor
+and look for line 12 with text *-- ==== Add your instruction here ====*. This is
+the point in migration when all dependent objects are dropped and you can issue
+ALTER TABLE instructions.
 
 Just below this line paste following::
 
     ALTER TABLE product
     ADD COLUMN "type" TEXT;
 
-Your `up.sql` will look like this::
+Your **up.sql** will look like this::
 
     -- begin --
     DROP FUNCTION get_user_orders(INTEGER);
@@ -453,12 +454,12 @@ project and access DB configuration.
 Installation
 ------------
 
-Add `'django_sqlibrist'` to INSTALLED_APPS
+Add *'django_sqlibrist'* to INSTALLED_APPS
 
 Settings
 --------
 
-`SQLIBRIST_DIRECTORY` - Path to the directory with schema and migrations files.
+*SQLIBRIST_DIRECTORY* - Path to the directory with schema and migrations files.
 Defaults to project's BASE_DIR/sql
 
 Usage
@@ -478,8 +479,8 @@ Django Admin for these tables, add following attributes to the model's Meta clas
             managed = False  # will tell Django to not create migrations for that table
             table_name = 'sometable'  # name of your table
 
-If primary key has other name than `id` and type not Integer, add that field to
-model class with `primary_key=True` argument, for example::
+If primary key has other name than *id* and type not Integer, add that field to
+model class with *primary_key=True* argument, for example::
 
     my_key = models.IntegerField(primary_key=True)
 
