@@ -322,7 +322,7 @@ Now let's make migration::
 You can see, that sqlibrist first drops *get_user_orders* function, after that
 *user_orders* view does not have dependent objects and can be dropped too.
 Then view and function are created in order, opposite to dropping.
-Ally our changes:
+Apply our changes::
 
     $ sqlibrist migrate
     Applying migration 0003-auto... done
@@ -330,11 +330,11 @@ Ally our changes:
 Last topic is to make change to table structure. Since we did not add *--DROP* section
 to our tables, any change has to be made manually. This is done in several steps:
 
-    1. Edit CREATE TABLE definition to reflect new structure;
-    2. Generate new migration with *makemigration* command;
-    3. Manually edit new migration's *up.sql* with ALTER TABLE instructions.
+1. Edit CREATE TABLE definition to reflect new structure;
+2. Generate new migration with *makemigration* command;
+3. Manually edit new migration's *up.sql* with ALTER TABLE instructions.
 
-To demonstrate this, let's add field *type text* to the *product* table. It will
+To demonstrate this, let's add field ``type text`` to the ``product`` table. It will
 look like this:
 
 **shop_schema/schema/tables/product.sql**::
