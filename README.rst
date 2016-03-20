@@ -37,7 +37,7 @@ Installation
 
 Sqlibrist can be installed into virtualenv:
 
-    $ pip install sqlibrist
+  $ pip install sqlibrist
 
 or system-wide:
 
