@@ -39,16 +39,16 @@ Sqlibrist can be installed into virtualenv::
 
     $ pip install sqlibrist
 
-or system-wide:
+or system-wide::
 
     $ sudo pip install sqlibrist
 
 Please, note: MySQL or PostgreSQL connectivity support is installed separately.
-Make sure you have DB client dev packages:
+Make sure you have DB client dev packages::
 
     $ sudo apt-get install libmysqlclient-dev  # MySQL
 
-or
+or::
 
     $ sudo apt-get install libpq-dev  # PostgreSQL
 
@@ -59,19 +59,19 @@ Tutorial
 Let's create simple project and go through typical steps of DB schema manageent.
 This will be small webshop.
 
-Create empty directory:
+Create empty directory::
 
     $ mkdir shop_schema
     $ cd shop_schema
 
 Then we need to create sqlibrist database structure, where we will keep
-schema and migrations.
+schema and migrations::
 
     $ sqlibrist init
     Creating directories...
     Done.
 
-You will get the following DB structure:
+You will get the following DB structure::
 
     shop_schema
         sqlibrist.yaml
@@ -85,7 +85,7 @@ You will get the following DB structure:
             types
             views
 
-In `sqlibrist.yaml` you will configure DB connections:
+In `sqlibrist.yaml` you will configure DB connections::
 
     ---
     default:
@@ -98,12 +98,12 @@ In `sqlibrist.yaml` you will configure DB connections:
 
 `host` and `port` are optional.
 
-Once you configured DB connection, test if is correct:
+Once you configured DB connection, test if is correct::
 
     $ sqlibrist test_connection
     Connection OK
 
-Next we need to create sqlibrist migrations table:
+Next we need to create sqlibrist migrations table::
 
     $ sqlibrist initdb
     Creating db...
@@ -113,7 +113,7 @@ Next we need to create sqlibrist migrations table:
 
 Now we are ready to build our DB schema.
 
-Create file `shop_schema/schema/tables/user.sql`:
+Create file `shop_schema/schema/tables/user.sql`::
 
     --UP
     CREATE TABLE "user" (
@@ -127,7 +127,7 @@ To be safe, and not accidentally drop any table with your data, we will not incl
 anything like DROP TABLE. Working with table upgrades and `--DOWN` is on the way
 below.
 
-`shop_schema/schema/tables/product.sql`:
+`shop_schema/schema/tables/product.sql`::
 
     --UP
     CREATE TABLE product (
@@ -135,7 +135,7 @@ below.
     name TEXT,
     price MONEY);
 
-`shop_schema/schema/tables/order.sql`:
+`shop_schema/schema/tables/order.sql`::
 
     --REQ tables/user
     --UP
@@ -148,7 +148,7 @@ Important here is the `--REQ tables/user` statement. It tells sqlibrist, that
 `order` table depends on `user` table. This will guarantee, that `user` will
 be created before `order`.
 
-`shop_schema/schema/tables/order_product.sql`:
+`shop_schema/schema/tables/order_product.sql`::
 
     --REQ tables/order
     --UP
@@ -158,7 +158,7 @@ be created before `order`.
     product_id INTEGER REFERENCES product(id),
     quantity INTEGER);
 
-Ok, now let's create our first migration:
+Ok, now let's create our first migration::
 
     $ sqlibrist makemigration -n 'initial'
     Creating:
@@ -168,7 +168,7 @@ Ok, now let's create our first migration:
      tables/order_product
     Creating new migration 0001-initial
 
-New files were created in `shop_schema/migrations/0001-initial`:
+New files were created in `shop_schema/migrations/0001-initial`::
 
     up.sql
     down.sql
@@ -184,7 +184,7 @@ migration, delete the directory with those 3 files, in our case `0001-initial`.
 You are free to review and edit up.sql and down.sql, of course if you know what
 you are doing. DO NOT edit schema.json.
 
-Now go ahead and apply our migration:
+Now go ahead and apply our migration::
 
     $ sqlibrist migrate
     Applying migration 0001-initial... done
@@ -193,7 +193,7 @@ Well done! Tables are created, but let's do something more interesting.
 
 We will create view that shows all user orders with order total:
 
-`shop_schema/schema/views/user_orders.sql`:
+`shop_schema/schema/views/user_orders.sql`::
 
     --REQ tables/user
     --REQ tables/order
@@ -219,7 +219,7 @@ We will create view that shows all user orders with order total:
 
 ... and function to return only given user's orders:
 
-`shop_schema/schema/functions/get_user_orders.sql`:
+`shop_schema/schema/functions/get_user_orders.sql`::
 
     --REQ views/user_orders
 
@@ -236,7 +236,7 @@ We will create view that shows all user orders with order total:
     --DOWN
     DROP FUNCTION get_user_orders(INTEGER);
 
-Next create new migration and apply it:
+Next create new migration and apply it::
 
     $ sqlibrist makemigration -n 'user_orders view and function'
     Creating:
@@ -261,7 +261,7 @@ of issues here:
     without recreating the function.
 
 This is where sqlibrist comes to help. Add one more field `SUM(op.quantity) as order_total`
-to the `user_orders` view:
+to the `user_orders` view::
 
     --REQ tables/user
     --REQ tables/order
@@ -286,7 +286,7 @@ to the `user_orders` view:
     --DOWN
     DROP VIEW user_orders;
 
-We can see, what was changed from the latest schema snapshot:
+We can see, what was changed from the latest schema snapshot::
 
     $ sqlibrist -V diff
     Changed items:
@@ -307,7 +307,7 @@ We can see, what was changed from the latest schema snapshot:
           FROM "user" u
           INNER JOIN "order" o ON u.id=o.user_id
 
-Now let's make migration:
+Now let's make migration::
 
     $ sqlibrist makemigration
     Updating:
@@ -337,7 +337,7 @@ to our tables, any change has to be made manually. This is done in several steps
 To demonstrate this, let's add field `type text` to the `product` table. It will
 look like this:
 
-`shop_schema/schema/tables/product.sql`:
+`shop_schema/schema/tables/product.sql`::
 
     --UP
     CREATE TABLE product (
@@ -346,7 +346,7 @@ look like this:
     "type" TEXT,
     price MONEY);
 
-This was #1. Next create new migration:
+This was #1. Next create new migration::
 
     $ sqlibrist makemigration -n 'new product field'
     Updating:
@@ -366,12 +366,12 @@ Now #3: open `shop_schema/migrations/0004-new product field/up.sql` with your ed
 with text `-- ==== Add your instruction here ====`. This is the point in migration when
 all dependent objects are dropped and you can issue ALTER TABLE instructions.
 
-Just below this line paste following:
+Just below this line paste following::
 
     ALTER TABLE product
     ADD COLUMN "type" TEXT;
 
-Your `up.sql` will look like this:
+Your `up.sql` will look like this::
 
     -- begin --
     DROP FUNCTION get_user_orders(INTEGER);
@@ -421,7 +421,7 @@ Your `up.sql` will look like this:
 Migration text is self-explanatory: drop function and view, alter table and then
 create view and function, with respect to their dependencies.
 
-Finally, apply your changes:
+Finally, apply your changes::
 
     $ sqlibrist migrate
     Applying migration 0004-new product field... done
@@ -463,11 +463,13 @@ Defaults to project's BASE_DIR/sql
 
 Usage
 -----
+::
 
     $ python manage.py sqlibrist <command> [options]
 
 If you want your tables to be accessible from Django ORM and/or for using
 Django Admin for these tables, add following attributes to the model's Meta class:
+::
 
     class SomeTable(models.Model):
         field1 = models.CharField()
@@ -477,7 +479,7 @@ Django Admin for these tables, add following attributes to the model's Meta clas
             table_name = 'sometable'  # name of your table
 
 If primary key has other name than `id` and type not Integer, add that field to
-model class with `primary_key=True` argument, for example:
+model class with `primary_key=True` argument, for example::
 
     my_key = models.IntegerField(primary_key=True)
 
