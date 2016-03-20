@@ -7,8 +7,6 @@ import os
 import re
 from json import loads, dumps
 
-import yaml
-from yaml.scanner import ScannerError
 from sqlibrist.engines import Postgresql
 
 
@@ -42,6 +40,9 @@ class MigrationIrreversible(SqlibristException):
 
 
 def get_config(args):
+    import yaml
+    from yaml.scanner import ScannerError
+
     try:
         with open(args.config_file) as config_file:
             configs = yaml.load(config_file.read())

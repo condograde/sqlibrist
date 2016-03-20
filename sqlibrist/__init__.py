@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-VERSION = '0.0.6'
+VERSION = '0.0.7'
 
 
 from sqlibrist.helpers import SqlibristException, handle_exception, \
