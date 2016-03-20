@@ -253,12 +253,12 @@ Now you want to add one more field in the *user_orders* view. There can be coupl
 of issues here:
 
 * we could try to drop and create updated view, but the database server will
-complain, that *get_user_orders* function depends on droppable view;
+ complain, that *get_user_orders* function depends on droppable view;
 
 * we could be smart and create view with 'CREATE OR REPLACE VIEW user_orders...',
-however single view's fields and their types make separate type, and the
-function *get_user_orders* returns that type. We can't simply change view type
-without recreating the function.
+ however single view's fields and their types make separate type, and the
+ function *get_user_orders* returns that type. We can't simply change view type
+ without recreating the function.
 
 This is where sqlibrist comes to help. Add one more field *SUM(op.quantity) as order_total*
 to the *user_orders* view::
