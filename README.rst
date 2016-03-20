@@ -35,11 +35,9 @@ Python dependencies:
 Installation
 ============
 
-Sqlibrist can be installed into virtualenv:
+Sqlibrist can be installed into virtualenv::
 
-``
     $ pip install sqlibrist
-``
 
 or system-wide:
 
