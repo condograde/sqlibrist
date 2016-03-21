@@ -1,11 +1,12 @@
 # -*- coding: utf8 -*-
 from __future__ import print_function
+
 import os
 
-from sqlibrist.helpers import get_engine, get_config
+from sqlibrist.helpers import get_engine
 
 
-def status(config):
+def status(args, config):
     """
     1. get applied migrations
     2. get all migrations
@@ -21,7 +22,3 @@ def status(config):
             print('Migration %s - applied' % migration)
         else:
             print('Migration %s - NOT applied' % migration)
-
-
-def status_command(args):
-    return status(config=get_config(args))

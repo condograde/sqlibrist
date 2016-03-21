@@ -1,12 +1,14 @@
 # -*- coding: utf8 -*-
 from __future__ import print_function
+
 import difflib
 
 from sqlibrist.helpers import get_last_schema, get_current_schema, \
     compare_schemas
 
 
-def diff(verbose):
+def diff(args, config):
+    verbose = args.verbose
     last_schema = get_last_schema()
 
     current_schema = get_current_schema()
@@ -35,7 +37,3 @@ def diff(verbose):
 
     else:
         print('No changes')
-
-
-def diff_command(args):
-    return diff(verbose=args.verbose)

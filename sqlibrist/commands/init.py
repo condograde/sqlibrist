@@ -15,7 +15,7 @@ default:
 """
 
 
-def init():
+def init(args, config):
     print('Creating directories...')
     dirlist = (
         'schema',
@@ -37,7 +37,3 @@ def init():
         with open(DEFAULT_CONFIG_FILE, 'w') as f:
             f.write(DEFAULT_CONFIG)
     print('Done.')
-
-
-def init_command(args):
-    return init()

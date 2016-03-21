@@ -7,6 +7,7 @@ from contextlib import contextmanager
 
 from django.core.management import BaseCommand
 
+from django_sqlibrist.helpers import get_config
 from django_sqlibrist.settings import SQLIBRIST_DIRECTORY
 from sqlibrist.helpers import get_command_parser, SqlibristException, \
     handle_exception
@@ -27,8 +28,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         _args = self.parser.parse_args(sys.argv[2:])
+
+        config = get_config(_args)
+
         with chdir(SQLIBRIST_DIRECTORY):
             try:
-                _args.func(_args)
+                _args.func(_args, config)
             except SqlibristException as e:
                 handle_exception(e)

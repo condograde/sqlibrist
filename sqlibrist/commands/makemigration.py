@@ -5,7 +5,11 @@ from sqlibrist.helpers import get_last_schema, save_migration, \
     get_current_schema, compare_schemas, mark_affected_items
 
 
-def makemigration(empty, dry_run, migration_name):
+def makemigration(args, config):
+    empty = args.empty
+    dry_run = args.dry_run
+    migration_name = args.name
+
     current_schema = get_current_schema()
     execution_plan_up = []
     execution_plan_down = []
@@ -83,9 +87,3 @@ def makemigration(empty, dry_run, migration_name):
                        execution_plan_up,
                        reversed(execution_plan_down),
                        suffix)
-
-
-def makemigration_command(args):
-    return makemigration(migration_name=args.name,
-                         dry_run=args.dry_run,
-                         empty=args.empty)

@@ -1,5 +1,6 @@
 # -*- coding: utf8 -*-
 from __future__ import print_function
+
 import argparse
 import glob
 import hashlib
@@ -9,9 +10,10 @@ from json import loads, dumps
 
 from sqlibrist.engines import Postgresql
 
+ENGINE_POSTGRESQL = 'pg'
 
 ENGINES = {
-    'pg': Postgresql
+    ENGINE_POSTGRESQL: Postgresql
 }
 
 
@@ -217,22 +219,17 @@ def handle_exception(e):
         print(e.message)
 
 
-def print_version(_):
-    from sqlibrist import VERSION
-    print(VERSION)
-
-
 def get_command_parser(parser=None):
-    from sqlibrist.commands.diff import diff_command
-    from sqlibrist.commands.init import init_command
-    from sqlibrist.commands.initdb import initdb_command
-    from sqlibrist.commands.makemigration import makemigration_command
-    from sqlibrist.commands.status import status_command
-    from sqlibrist.commands.test_connection import test_connection_command
-    from sqlibrist.commands.migrate import migrate_command
+    from sqlibrist.commands.diff import diff
+    from sqlibrist.commands.init import init
+    from sqlibrist.commands.initdb import initdb
+    from sqlibrist.commands.makemigration import makemigration
+    from sqlibrist.commands.status import status
+    from sqlibrist.commands.test_connection import test_connection
+    from sqlibrist.commands.migrate import migrate
+    from sqlibrist.commands.info import info
 
     _parser = parser or argparse.ArgumentParser()
-    _parser.add_argument('--verbose', '-V', action='store_true', default=False)
     _parser.add_argument('--config-file', '-f',
                          help='Config file, default is sqlibrist.yaml',
                          type=str,
@@ -246,37 +243,42 @@ def get_command_parser(parser=None):
 
     subparsers = _parser.add_subparsers(parser_class=argparse.ArgumentParser)
 
-    # print version
-    test_connection_parser = subparsers.add_parser('version',
-                                                   help='Print sqlibrist version')
-    test_connection_parser.set_defaults(func=print_version)
+    # print info
+    print_info_parser = subparsers.add_parser('info',
+                                              help='Print sqlibrist info')
+    print_info_parser.add_argument('--verbose', '-v',
+                                   action='store_true', default=False)
+    print_info_parser.set_defaults(func=info)
 
     # test_connection
     test_connection_parser = subparsers.add_parser('test_connection',
                                                    help='Test DB connection')
-    test_connection_parser.set_defaults(func=test_connection_command)
+    test_connection_parser.add_argument('--verbose', '-v',
+                                        action='store_true', default=False)
+    test_connection_parser.set_defaults(func=test_connection)
 
     # init
     init_parser = subparsers.add_parser('init',
                                         help='Init directory structure')
-    init_parser.set_defaults(func=init_command)
+    init_parser.add_argument('--verbose', '-v',
+                             action='store_true', default=False)
+    init_parser.set_defaults(func=init)
 
     # initdb
     initdb_parser = subparsers.add_parser('initdb',
                                           help='Create DB table for '
                                                'migrations tracking')
-    initdb_parser.set_defaults(func=initdb_command)
+    initdb_parser.add_argument('--verbose', '-v',
+                               action='store_true', default=False)
+    initdb_parser.set_defaults(func=initdb)
 
     # makemigrations
     makemigration_parser = subparsers.add_parser('makemigration',
                                                  help='Create new migration')
-    makemigration_parser.set_defaults(func=makemigration_command)
+    makemigration_parser.set_defaults(func=makemigration)
+    makemigration_parser.add_argument('--verbose', '-v',
+                                      action='store_true', default=False)
 
-    # todo: not implemented
-    # makemigration_parser.add_argument('--inplace',
-    #                                   help=u'Do not cascadely DROP-CREATE changed entities and their dependencies',
-    #                                   action='store_true',
-    #                                   default=False)
     makemigration_parser.add_argument('--empty',
                                       help='Create migration with empty up.sql '
                                            'for manual instructions',
@@ -294,7 +296,9 @@ def get_command_parser(parser=None):
     # migrate
     migrate_parser = subparsers.add_parser('migrate',
                                            help='Apply pending migrations')
-    migrate_parser.set_defaults(func=migrate_command)
+    migrate_parser.set_defaults(func=migrate)
+    migrate_parser.add_argument('--verbose', '-v',
+                                action='store_true', default=False)
     migrate_parser.add_argument('--fake',
                                 help='Mark pending migrations as applied',
                                 action='store_true',
@@ -312,10 +316,14 @@ def get_command_parser(parser=None):
 
     # diff
     diff_parser = subparsers.add_parser('diff', help='Show changes to schema')
-    diff_parser.set_defaults(func=diff_command)
+    diff_parser.set_defaults(func=diff)
+    diff_parser.add_argument('--verbose', '-v',
+                             action='store_true', default=False)
 
     # status
     status_parser = subparsers.add_parser('status',
                                           help='Show unapplied migrations')
-    status_parser.set_defaults(func=status_command)
+    status_parser.add_argument('--verbose', '-v',
+                               action='store_true', default=False)
+    status_parser.set_defaults(func=status)
     return _parser

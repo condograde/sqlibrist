@@ -1,9 +1,10 @@
 # -*- coding: utf8 -*-
 from __future__ import print_function
+
 import glob
 import os
 
-from sqlibrist.helpers import get_engine, get_config, ApplyMigrationFailed, \
+from sqlibrist.helpers import get_engine, ApplyMigrationFailed, \
     MigrationIrreversible
 
 
@@ -19,7 +20,10 @@ def unapplied_migrations(migration_list, applied_migrations):
     return ml
 
 
-def migrate(config, fake, revert, till_migration_name):
+def migrate(args, config):
+    fake = args.fake
+    revert = args.revert
+    till_migration_name = args.migration
     engine = get_engine(config)
 
     applied_migrations = engine.get_applied_migrations()
@@ -73,10 +77,3 @@ def migrate(config, fake, revert, till_migration_name):
         if till_migration_name \
                 and migration_name == till_migration_name:
             break
-
-
-def migrate_command(args):
-    return migrate(config=get_config(args),
-                   fake=args.fake,
-                   revert=args.revert,
-                   till_migration_name=args.migration)

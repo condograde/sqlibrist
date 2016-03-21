@@ -508,8 +508,6 @@ advocating you against using sqitch, you should try it yourself.
 TODO
 ====
 
-- django_sqlibrist:
-    * take DB connection details from django settings
 - documentation
     * django_sqlibrist: Migrating existing models
     * detailed info on all commands
@@ -517,5 +515,7 @@ TODO
 
 Changelog
 =========
+
+0.1.0 django_sqlibrist gets DB connection settings from Django project's settings instead of config file
 
 0.0.7 django_sqlibrist moved to separate package and is importable in settings.py as "django_sqlibrist"
