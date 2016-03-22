@@ -8,12 +8,14 @@ import os
 import re
 from json import loads, dumps
 
-from sqlibrist.engines import Postgresql
+from sqlibrist.engines import Postgresql, MySQL
 
 ENGINE_POSTGRESQL = 'pg'
+ENGINE_MYSQL = 'mysql'
 
 ENGINES = {
-    ENGINE_POSTGRESQL: Postgresql
+    ENGINE_POSTGRESQL: Postgresql,
+    ENGINE_MYSQL: MySQL
 }
 
 
@@ -41,22 +43,40 @@ class MigrationIrreversible(SqlibristException):
     pass
 
 
-def get_config(args):
-    import yaml
-    from yaml.scanner import ScannerError
+class LazyConfig(object):
+    def __init__(self, args):
+        self.args = args
 
-    try:
-        with open(args.config_file) as config_file:
-            configs = yaml.load(config_file.read())
-    except IOError:
-        raise BadConfig('No config file %s found!' % args.config_file)
-    except ScannerError:
-        raise BadConfig('Bad config file syntax')
-    else:
+    def load_config(self):
+        import yaml
+        from yaml.scanner import ScannerError
+
         try:
-            return configs[args.config]
-        except KeyError:
-            raise BadConfig('No config named %s found!' % args.config)
+            with open(self.args.config_file) as config_file:
+                configs = yaml.load(config_file.read())
+        except IOError:
+            raise BadConfig('No config file %s found!' % self.args.config_file)
+        except ScannerError:
+            raise BadConfig('Bad config file syntax')
+        else:
+            try:
+                self._dict = configs[self.args.config]
+            except KeyError:
+                raise BadConfig('No config named %s found!' % self.args.config)
+
+    def __getitem__(self, key):
+        try:
+            return self._dict[key]
+        except AttributeError:
+            self.load_config()
+            return self[key]
+
+    def __repr__(self):
+        try:
+            return self._dict
+        except AttributeError:
+            self.load_config()
+            return repr(self)
 
 
 def get_engine(config):

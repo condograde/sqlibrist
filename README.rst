@@ -1,15 +1,17 @@
 sqlibrist
 =========
 
-Sqlibrist is made for developers, who do not use ORM to manage their database
+Sqlibrist is command-line tool, made for developers, who do not use ORM to manage their database
 structure. Programming database objects and deploying them to production
 is not easy. Naive approach is to manually write patches with SQL statements and then replay
 them on others DB instances. This, being simple and straightforward, may get tricky
 when your database structure grows in size and have numerous inter-dependent
 objects.
 
-Sqlibrist makes the process of creating SQL patches much more easy and proposes
-a way to organize your SQL code. All database objects are described declaratively
+Sqlibrist in essense is tool to make the process of creating SQL patches much more
+easy, and as side-effect it proposes a way to organize your SQL code. It does not
+dictate design desisions, or stands on your way when you do something wrong
+(notorious shooting in foot). All database objects are described declaratively
 in separate files in the form of ``CREATE TABLE`` or ``CREATE FUNCTION``, having
 dependency instructions.
 
@@ -21,7 +23,14 @@ is created with instructions to recreate all changed objects cascadely with thei
 dependencies, create new or remove deleted. In the latter case, sqlibrist will not
 let you delete object that has left dependants.
 
-Currently PostgreSQL and MySQL are supported.
+Currently PostgreSQL is supported. MySQL support is experimental, and not well-tested
+yet.
+
+
+Platform compatibility
+======================
+
+Linux, Mac OS, Windows. See installation instructions for each below.
 
 
 Requirements
@@ -31,10 +40,21 @@ Python dependencies:
 
 - PyYAML
 - psycopg2 (optional)
-
+- mysql-python (optional)
 
 Installation
 ============
+
+Linux
+-----
+
+**Ubuntu/Debian**
+
+First install required libraries::
+
+    $ sudo apt-get install python-pip python-dev libyaml-dev
+    $ sudo apt-get install libmysqlclient-dev  # for MySQL
+    $ sudo apt-get install libpq-dev  # PostgreSQL
 
 Sqlibrist can be installed into virtualenv::
 
@@ -44,15 +64,34 @@ or system-wide::
 
     $ sudo pip install sqlibrist
 
-Please, note: MySQL or PostgreSQL connectivity support is installed separately.
-Make sure you have DB client dev packages::
+**Fedora/CentOS/RHEL**
 
-    $ sudo apt-get install libmysqlclient-dev  # MySQL
+First install required libraries (replace ``dnf`` to ``yum`` if you are using
+pre-dnf package manager)::
 
-or::
+    $ sudo dnf install python-devel python-pip libyaml-devel
+    $ sudo dnf install postgresql-devel  # PostgreSQL
 
-    $ sudo apt-get install libpq-dev  # PostgreSQL
+    $ sudo dnf install mariadb-devel  # for MariaDB
+    or
+    $ sudo dnf install mysql++-devel  # for MySQL
 
+Sqlibrist can be installed into virtualenv::
+
+    $ pip install sqlibrist
+
+or system-wide::
+
+    $ sudo pip install sqlibrist
+
+
+MacOS
+-----
+TODO
+
+Windows
+-------
+TODO
 
 Tutorial
 ========
@@ -511,11 +550,12 @@ TODO
 - documentation
     * django_sqlibrist: Migrating existing models
     * detailed info on all commands
-- MySQL support
 
 Changelog
 =========
 
-0.1.0 django_sqlibrist gets DB connection settings from Django project's settings instead of config file
+ 0.1.1 fixed loading config file
 
-0.0.7 django_sqlibrist moved to separate package and is importable in settings.py as "django_sqlibrist"
+ 0.1.0 django_sqlibrist gets DB connection settings from Django project's settings instead of config file
+
+ 0.0.7 django_sqlibrist moved to separate package and is importable in settings.py as "django_sqlibrist"

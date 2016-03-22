@@ -78,7 +78,8 @@ class Postgresql(BaseEngine):
                     if not fake and statements.strip():
                         cursor.execute(statements)
                 except (
-                psycopg2.OperationalError, psycopg2.ProgrammingError) as e:
+                        psycopg2.OperationalError,
+                        psycopg2.ProgrammingError) as e:
                     connection.rollback()
                     print(e.message)
                     from sqlibrist.helpers import ApplyMigrationFailed
@@ -99,7 +100,8 @@ class Postgresql(BaseEngine):
                     if not fake:
                         cursor.execute(statements)
                 except (
-                psycopg2.OperationalError, psycopg2.ProgrammingError) as e:
+                        psycopg2.OperationalError,
+                        psycopg2.ProgrammingError) as e:
                     connection.rollback()
                     print(e.message)
                     from sqlibrist.helpers import ApplyMigrationFailed
@@ -109,3 +111,81 @@ class Postgresql(BaseEngine):
                     cursor.execute('DELETE FROM sqlibrist.migrations '
                                    'WHERE migration = (%s); ', [name])
                     connection.commit()
+
+
+class MySQL(BaseEngine):
+    def get_connection(self):
+        import MySQLdb
+        return MySQLdb.connect(
+            db=self.config.get('name'),
+            user=self.config.get('user'),
+            host=self.config.get('host', '127.0.0.1'),
+            passwd=self.config.get('password'),
+            port=self.config.get('port'),
+        )
+
+    def create_migrations_table(self):
+        connection = self.get_connection()
+        cursor = connection.cursor()
+        print('Creating migrations log table...\n')
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS sqlibrist_migrations (
+            id SERIAL PRIMARY KEY,
+            migration TEXT,
+            `datetime` TIMESTAMP
+           );
+        ''')
+
+    def get_applied_migrations(self):
+        connection = self.get_connection()
+        cursor = connection.cursor()
+        cursor.execute('''
+            SELECT migration FROM sqlibrist_migrations
+            ORDER BY `datetime`; ''')
+        return cursor.fetchall()
+
+    def get_last_applied_migration(self):
+        connection = self.get_connection()
+        cursor = connection.cursor()
+
+        cursor.execute('''
+            SELECT migration FROM sqlibrist_migrations
+            ORDER BY `datetime` DESC
+            LIMIT 1; ''')
+        result = cursor.fetchone()
+        return result and result[0] or None
+
+    def apply_migration(self, name, statements, fake=False):
+        import MySQLdb
+        connection = self.get_connection()
+        cursor = connection.cursor()
+
+        try:
+            if not fake and statements.strip():
+                cursor.execute(statements)
+        except (MySQLdb.OperationalError, MySQLdb.ProgrammingError) as e:
+            print('\n'.join(map(str, e.args)))
+            from sqlibrist.helpers import ApplyMigrationFailed
+
+            raise ApplyMigrationFailed
+        else:
+            cursor.execute('INSERT INTO sqlibrist_migrations '
+                           '(migration) VALUES (%s);',
+                           [name.split('/')[-1]])
+
+    def unapply_migration(self, name, statements, fake=False):
+        import MySQLdb
+        connection = self.get_connection()
+        cursor = connection.cursor()
+
+        try:
+            if not fake:
+                cursor.execute(statements)
+        except (MySQLdb.OperationalError, MySQLdb.ProgrammingError) as e:
+            print('\n'.join(map(str, e.args)))
+            from sqlibrist.helpers import ApplyMigrationFailed
+
+            raise ApplyMigrationFailed
+        else:
+            cursor.execute('DELETE FROM sqlibrist_migrations '
+                           'WHERE migration = (%s); ', [name])

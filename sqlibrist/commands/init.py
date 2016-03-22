@@ -7,6 +7,7 @@ DEFAULT_CONFIG_FILE = 'sqlibrist.yaml'
 DEFAULT_CONFIG = """---
 default:
   engine: pg
+#  engine: mysql
   user: <username>
   name: <database_name>
   password: <password>
