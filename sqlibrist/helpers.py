@@ -64,6 +64,12 @@ class LazyConfig(object):
             except KeyError:
                 raise BadConfig('No config named %s found!' % self.args.config)
 
+    def get(self, key, default=None):
+        try:
+            return self[key]
+        except KeyError:
+            return default
+
     def __getitem__(self, key):
         try:
             return self._dict[key]

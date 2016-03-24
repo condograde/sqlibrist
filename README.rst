@@ -553,6 +553,9 @@ TODO
 
 Changelog
 =========
+ 0.1.3 django_sqlibrist configurator fixed
+
+ 0.1.2 LazyConfig fixed
 
  0.1.1 fixed loading config file
 

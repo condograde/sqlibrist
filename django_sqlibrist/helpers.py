@@ -20,7 +20,7 @@ def get_config(args):
 
     config['name'] = DB.get('NAME', '')
     config['user'] = DB.get('USER', '')
-    config['password'] = DB.get('PASSWORD', '')
+    config['password'] = DB.get('PASSWORD')
     config['host'] = DB.get('HOST') or '127.0.0.1'
     config['port'] = DB.get('PORT') or DEFAULT_PORTS[config['engine']]
     return config
