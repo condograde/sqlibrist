@@ -553,6 +553,11 @@ TODO
 
 Changelog
 =========
+
+ 0.1.5 django_sqlibrist takes engine and connection from django project settings
+
+ 0.1.4 django_sqlibrist configurator fixed
+
  0.1.3 django_sqlibrist configurator fixed
 
  0.1.2 LazyConfig fixed

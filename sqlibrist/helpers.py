@@ -85,9 +85,9 @@ class LazyConfig(object):
             return repr(self)
 
 
-def get_engine(config):
+def get_engine(config, connection=None):
     try:
-        return ENGINES[config['engine']](config)
+        return ENGINES[config['engine']](config, connection)
     except KeyError:
         raise BadConfig('DB engine not selected in config or wrong engine '
                         'name (must be one of %s)' % ','.join(ENGINES.keys()))

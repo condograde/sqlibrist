@@ -20,11 +20,11 @@ def unapplied_migrations(migration_list, applied_migrations):
     return ml
 
 
-def migrate(args, config):
+def migrate(args, config, connection=None):
     fake = args.fake
     revert = args.revert
     till_migration_name = args.migration
-    engine = get_engine(config)
+    engine = get_engine(config, connection)
 
     applied_migrations = engine.get_applied_migrations()
 

@@ -4,10 +4,10 @@ from __future__ import print_function
 from sqlibrist.helpers import get_engine
 
 
-def test_connection(args, config):
-    engine = get_engine(config)
+def test_connection(args, config, connection=None):
+    engine = get_engine(config, connection)
 
-    connection = engine.get_connection()
+    db_connection = engine.get_connection()
 
     print('Connection OK')
-    connection.close()
+    db_connection.close()

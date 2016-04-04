@@ -16,7 +16,7 @@ default:
 """
 
 
-def init(args, config):
+def init(args, config, connection=None):
     print('Creating directories...')
     dirlist = (
         'schema',

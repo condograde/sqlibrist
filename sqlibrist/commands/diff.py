@@ -7,7 +7,7 @@ from sqlibrist.helpers import get_last_schema, get_current_schema, \
     compare_schemas
 
 
-def diff(args, config):
+def diff(args, config, connection=None):
     verbose = args.verbose
     last_schema = get_last_schema()
 

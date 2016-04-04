@@ -3,8 +3,9 @@ from __future__ import absolute_import, print_function
 
 
 class BaseEngine(object):
-    def __init__(self, config):
+    def __init__(self, config, connection=None):
         self.config = config
+        self.connection = connection
 
     def get_connection(self):
         raise NotImplementedError
@@ -24,14 +25,16 @@ class BaseEngine(object):
 
 class Postgresql(BaseEngine):
     def get_connection(self):
-        import psycopg2
-        return psycopg2.connect(
-            database=self.config.get('name'),
-            user=self.config.get('user'),
-            host=self.config.get('host'),
-            password=self.config.get('password'),
-            port=self.config.get('port'),
-        )
+        if self.connection is None:
+            import psycopg2
+            self.connection = psycopg2.connect(
+                database=self.config.get('name'),
+                user=self.config.get('user'),
+                host=self.config.get('host'),
+                password=self.config.get('password'),
+                port=self.config.get('port'),
+            )
+        return self.connection
 
     def create_migrations_table(self):
         connection = self.get_connection()
@@ -115,14 +118,16 @@ class Postgresql(BaseEngine):
 
 class MySQL(BaseEngine):
     def get_connection(self):
-        import MySQLdb
-        return MySQLdb.connect(
-            db=self.config.get('name'),
-            user=self.config.get('user'),
-            host=self.config.get('host', '127.0.0.1'),
-            passwd=self.config.get('password'),
-            port=self.config.get('port'),
-        )
+        if self.connection is None:
+            import MySQLdb
+            self.connection = MySQLdb.connect(
+                db=self.config.get('name'),
+                user=self.config.get('user'),
+                host=self.config.get('host', '127.0.0.1'),
+                passwd=self.config.get('password'),
+                port=self.config.get('port'),
+            )
+        return self.connection
 
     def create_migrations_table(self):
         connection = self.get_connection()

@@ -5,7 +5,7 @@ from sqlibrist.helpers import get_last_schema, save_migration, \
     get_current_schema, compare_schemas, mark_affected_items
 
 
-def makemigration(args, config):
+def makemigration(args, config, connection=None):
     empty = args.empty
     dry_run = args.dry_run
     migration_name = args.name

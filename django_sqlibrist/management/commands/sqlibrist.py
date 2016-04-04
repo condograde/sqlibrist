@@ -6,6 +6,7 @@ import sys
 from contextlib import contextmanager
 
 from django.core.management import BaseCommand
+from django.db import connection
 
 from django_sqlibrist.helpers import get_config
 from django_sqlibrist.settings import SQLIBRIST_DIRECTORY
@@ -33,6 +34,6 @@ class Command(BaseCommand):
 
         with chdir(SQLIBRIST_DIRECTORY):
             try:
-                _args.func(_args, config)
+                _args.func(_args, config, connection)
             except SqlibristException as e:
                 handle_exception(e)
