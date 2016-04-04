@@ -554,6 +554,8 @@ TODO
 Changelog
 =========
 
+ 0.1.6 fixes
+
  0.1.5 django_sqlibrist takes engine and connection from django project settings
 
  0.1.4 django_sqlibrist configurator fixed
