@@ -51,8 +51,8 @@ def makemigration(args, config, connection=None):
                         and last_schema[item['name']]['down']:
                     execution_plan_up.append(last_schema[item['name']]['down'])
                     execution_plan_down.append(last_schema[item['name']]['up'])
-                elif item['name'] not in last_schema and item['name']['down']:
-                    execution_plan_up.append(item['name']['down'])
+                elif item['name'] not in last_schema and item['down']:
+                    execution_plan_up.append(item['down'])
 
             execution_plan_up.append(
                 ['-- ==== Add your instruction here ===='])
