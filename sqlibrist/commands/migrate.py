@@ -29,7 +29,7 @@ def migrate(args, config, connection=None):
     applied_migrations = engine.get_applied_migrations()
 
     if applied_migrations and revert:
-        last_applied_migration = applied_migrations[-1]
+        last_applied_migration = applied_migrations[-1][0]
         try:
             with open(os.path.join('migrations',
                                    last_applied_migration,
