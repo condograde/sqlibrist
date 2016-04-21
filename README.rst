@@ -104,7 +104,7 @@ or system-wide::
     $ sudo pip install sqlibrist
 
 Also you need to install database dependencies
-MySQl::
+MySQL::
 
     $ pip install mysql-python
 
