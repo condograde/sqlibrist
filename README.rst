@@ -87,7 +87,30 @@ or system-wide::
 
 MacOS
 -----
-TODO
+
+First install required libraries::
+
+    $ sudo easy_install pip
+    $ brew install mysql  # for MySQL
+    $ brew install postgres  # PostgreSQL
+
+
+Sqlibrist can be installed into virtualenv::
+
+    $ pip install sqlibrist
+
+or system-wide::
+
+    $ sudo pip install sqlibrist
+
+Also you need to install database dependencies
+MySQl::
+
+    $ pip install mysql-python
+
+PostgreSQL::
+
+    $ pip install psycopg2 
 
 Windows
 -------
