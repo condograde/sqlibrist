@@ -72,7 +72,10 @@ class LazyConfig(object):
 
     def __getitem__(self, key):
         try:
-            return self._dict[key]
+            if key == 'port':
+                return int(self._dict[key])
+            else:
+                return str(self._dict[key])
         except AttributeError:
             self.load_config()
             return self[key]

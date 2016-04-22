@@ -87,7 +87,30 @@ or system-wide::
 
 MacOS
 -----
-TODO
+
+First install required libraries::
+
+    $ sudo easy_install pip
+    $ brew install mysql  # for MySQL
+    $ brew install postgres  # PostgreSQL
+
+
+Sqlibrist can be installed into virtualenv::
+
+    $ pip install sqlibrist
+
+or system-wide::
+
+    $ sudo pip install sqlibrist
+
+Also you need to install database dependencies
+MySQL::
+
+    $ pip install mysql-python
+
+PostgreSQL::
+
+    $ pip install psycopg2
 
 Windows
 -------
@@ -574,4 +597,4 @@ Changelog
 
 0.1.0 django_sqlibrist gets DB connection settings from Django project's settings instead of config file
 
-0.0.7 django_sqlibrist moved to separate package and is importable in settings.py as "django_sqlibrist"
+ 0.0.7 django_sqlibrist moved to separate package and is importable in settings.py as "django_sqlibrist"
