@@ -8,7 +8,10 @@ DEFAULT_PORTS = {
 }
 
 
-def get_config(args):
+def get_config():
+    """
+    Gets engine type from Django settings
+    """
     DB = settings.DATABASES['default']
     ENGINE = DB.get('ENGINE', '')
     config = {}
@@ -24,3 +27,32 @@ def get_config(args):
                         '%s' % DB.get('ENGINE', ''))
 
     return config
+
+
+class Args(object):
+    """
+    Wrapper for "options" argument for Django command. Translates attribute
+    access to dict item access
+    """
+    def __init__(self, options):
+        self.options = options
+
+    def __getattr__(self, item):
+        return self.options[item]
+
+
+def patch_test_db_creation():
+    from django.db.backends.base.creation import BaseDatabaseCreation
+
+    create_test_db_original = BaseDatabaseCreation.create_test_db
+
+    def create_test_db_patched(*args, **kwargs):
+        test_database_name = create_test_db_original(*args, **kwargs)
+
+        from django.core.management import call_command
+        call_command('sqlibrist', 'initdb')
+        call_command('sqlibrist', 'migrate')
+
+        return test_database_name
+
+    BaseDatabaseCreation.create_test_db = create_test_db_patched

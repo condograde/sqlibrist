@@ -554,22 +554,24 @@ TODO
 Changelog
 =========
 
- 0.1.8 fixes
+0.1.9 config file parsing fixed, MAC installation added (thanks to https://github.com/tolyadouble); django integration improved
 
- 0.1.7 fixes
+0.1.8 fixes
 
- 0.1.6 fixes
+0.1.7 fixes
 
- 0.1.5 django_sqlibrist takes engine and connection from django project settings
+0.1.6 fixes
 
- 0.1.4 django_sqlibrist configurator fixed
+0.1.5 django_sqlibrist takes engine and connection from django project settings
 
- 0.1.3 django_sqlibrist configurator fixed
+0.1.4 django_sqlibrist configurator fixed
 
- 0.1.2 LazyConfig fixed
+0.1.3 django_sqlibrist configurator fixed
 
- 0.1.1 fixed loading config file
+0.1.2 LazyConfig fixed
 
- 0.1.0 django_sqlibrist gets DB connection settings from Django project's settings instead of config file
+0.1.1 fixed loading config file
 
- 0.0.7 django_sqlibrist moved to separate package and is importable in settings.py as "django_sqlibrist"
+0.1.0 django_sqlibrist gets DB connection settings from Django project's settings instead of config file
+
+0.0.7 django_sqlibrist moved to separate package and is importable in settings.py as "django_sqlibrist"

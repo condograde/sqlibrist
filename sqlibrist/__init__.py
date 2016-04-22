@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-VERSION = '0.1.8'
+VERSION = '0.1.9'
 
 from sqlibrist.helpers import SqlibristException, handle_exception, \
     get_command_parser, LazyConfig
