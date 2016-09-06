@@ -577,6 +577,8 @@ TODO
 Changelog
 =========
 
+0.1.10 string encoding fix
+
 0.1.9 config file parsing fixed, MAC installation added (thanks to https://github.com/tolyadouble); django integration improved
 
 0.1.8 fixes
