@@ -141,7 +141,7 @@ def init_item(directory, filename):
     requires = list(extract_reqs(lines))
     up = list(extract_up(lines))
     down = list(extract_down(lines))
-    _hash = hashlib.md5(re.sub(r'\s{2,}', '', ''.join(up))).hexdigest()
+    _hash = hashlib.md5(re.sub(r'\s{2,}', '', ''.join(up)).encode()).hexdigest()
 
     return (filename,
             {'hash': _hash,
@@ -225,8 +225,7 @@ def save_migration(schema, plan_up, plan_down, suffix=''):
         with open(os.path.join(dirname, plan_name), 'w') as f:
             for item in instructions:
                 f.write('-- begin --\n')
-                f.write(('\n'.join(map(lambda s: s.encode('utf8'),
-                                       item))).strip())
+                f.write('\n'.join(item))
                 f.write('\n')
                 f.write('-- end --\n')
                 f.write('\n\n')
