@@ -557,7 +557,7 @@ Alternatives
 
 Sqlibrist is not new concept, it has a lot of alternatives, most notable, I think,
 is [sqitch](http://sqitch.org/). It is great tool, with rich development history and
-community arount it. I started using it at first, however it did not make me completely
+community around it. I started using it at first, however it did not make me completely
 happy. My problem with sqitch was pretty hard installation progress
 (shame on me, first of all). It is written in Perl and has huge number of dependencies.
 For man, unfamiliar with Perl pachage systems, it was quite a challenge to
